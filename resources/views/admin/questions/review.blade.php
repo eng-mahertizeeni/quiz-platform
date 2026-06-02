@@ -23,7 +23,7 @@
                 @endforeach
             </div>
             <div class="d-flex gap-2 mb-3">
-                <span class="badge badge-points-{{ $submission->difficulty === 'medium' ? 250 : ($submission->difficulty === 'hard' ? 500 : 750) }}">{{ $submission->difficulty }}</span>
+                <span class="badge badge-points-{{ $submission->difficulty === 'medium' ? 250 : ($submission->difficulty === 'hard' ? 500 : 750) }}">{{ $submission->difficulty_label }}</span>
                 <span class="badge" style="background:{{ $submission->category->color ?? '#666' }}22;color:{{ $submission->category->color ?? '#666' }}">{{ $submission->category->name ?? '--' }}</span>
             </div>
             @if($submission->image)

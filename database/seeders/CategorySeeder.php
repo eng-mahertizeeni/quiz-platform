@@ -26,10 +26,15 @@ class CategorySeeder extends Seeder
             ['name' => 'مسلسلات سورية', 'slug' => 'syrian-drama', 'icon' => 'tv', 'color' => '#BE123C', 'is_featured' => true, 'sort_order' => 14],
             ['name' => 'الطب والصحة', 'slug' => 'health', 'icon' => 'heartbeat', 'color' => '#DC2626', 'is_featured' => true, 'sort_order' => 15],
             ['name' => 'شخصيات تاريخية', 'slug' => 'historical-figures', 'icon' => 'crown', 'color' => '#7C3AED', 'is_featured' => true, 'sort_order' => 16],
+            ['name' => 'أقوال مشهورة', 'slug' => 'quotes', 'icon' => 'quote-right', 'color' => '#F59E0B', 'is_featured' => true, 'sort_order' => 17],
+            ['name' => 'عواصم وأعلام ودول', 'slug' => 'capitals', 'icon' => 'flag', 'color' => '#6366F1', 'is_featured' => true, 'sort_order' => 18],
         ];
 
         foreach ($categories as $cat) {
-            Category::create(array_merge($cat, ['is_active' => true]));
+            Category::firstOrCreate(
+                ['slug' => $cat['slug']],
+                array_merge($cat, ['is_active' => true])
+            );
         }
     }
 }

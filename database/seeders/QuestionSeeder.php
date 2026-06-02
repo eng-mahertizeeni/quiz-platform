@@ -25,6 +25,12 @@ class QuestionSeeder extends Seeder
             require __DIR__ . '/questions/cars.php',
             require __DIR__ . '/questions/space.php',
             require __DIR__ . '/questions/sports.php',
+            require __DIR__ . '/questions/football-career.php',
+            require __DIR__ . '/questions/syrian-drama.php',
+            require __DIR__ . '/questions/health.php',
+            require __DIR__ . '/questions/historical-figures.php',
+            require __DIR__ . '/questions/quotes.php',
+            require __DIR__ . '/questions/capitals.php',
         );
 
         foreach ($questions as $q) {

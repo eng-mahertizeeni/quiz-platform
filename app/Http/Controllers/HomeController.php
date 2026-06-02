@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\GameSession;
-use App\Models\User;
 use App\Models\UserQuestionAnswer;
 use App\Services\StatsService;
 use Illuminate\Support\Facades\Auth;
@@ -41,8 +40,7 @@ class HomeController extends Controller
 
     public function dashboard()
     {
-        $user_id = Auth::id();
-        $user = User::find($user_id);
+        $user = Auth::user();
         $stats = $this->statsService->getUserStats($user);
         $activeGames = GameSession::where('created_by', $user->id)
             ->whereIn('status', ['waiting', 'active'])

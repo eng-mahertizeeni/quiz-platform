@@ -111,8 +111,8 @@
 
     function submitAnswer(roundId, answer) {
         const code = '{{ $session->code }}';
-        const teamId = {{ $session->current_team_id ?? 'null' }};
-        if (!teamId) { alert('لا يوجد فريق محدد'); return; }
+        const teamId = @json($session->current_team_id);
+        if (teamId === null) { alert('لا يوجد فريق محدد'); return; }
 
         document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
 

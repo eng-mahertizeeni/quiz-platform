@@ -169,9 +169,8 @@
         </a>
         <a href="{{ route('admin.questions.submissions') }}" class="nav-link {{ request()->routeIs('admin.questions.submissions*') || request()->routeIs('admin.questions.review*') ? 'active' : '' }}">
             <i class="fas fa-inbox"></i>الأسئلة المقترحة
-            @php $pending = \App\Models\SubmittedQuestion::where('status','pending')->count() @endphp
-            @if($pending > 0)
-                <span class="badge bg-danger ms-auto">{{ $pending }}</span>
+            @if(($pendingCount = cache()->remember('pending_submissions_count', 60, fn() => \App\Models\SubmittedQuestion::where('status','pending')->count())) > 0)
+                <span class="badge bg-danger ms-auto">{{ $pendingCount }}</span>
             @endif
         </a>
 

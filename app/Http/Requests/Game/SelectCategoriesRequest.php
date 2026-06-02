@@ -16,7 +16,7 @@ class SelectCategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_ids' => 'required|array|size:6',
+            'category_ids' => 'required|array|min:1|max:6',
             'category_ids.*' => 'required|exists:categories,id',
         ];
     }
@@ -30,7 +30,7 @@ class SelectCategoriesRequest extends FormRequest
                 if ($category && !$category->hasEnoughQuestions()) {
                     $validator->errors()->add(
                         'category_ids',
-                        "الفئة \"{$category->name}\" لا تحتوي على أسئلة كافية (يجب 2 لكل مستوى صعوبة)"
+                        "الفئة \"{$category->name}\" لا تحتوي على أسئلة كافية"
                     );
                 }
             }
@@ -41,7 +41,8 @@ class SelectCategoriesRequest extends FormRequest
     {
         return [
             'category_ids.required' => 'يجب اختيار الفئات',
-            'category_ids.size' => 'يجب اختيار 6 فئات بالضبط',
+            'category_ids.min' => 'يجب اختيار فئة واحدة على الأقل',
+            'category_ids.max' => 'يمكن اختيار 6 فئات كحد أقصى',
             'category_ids.*.exists' => 'إحدى الفئات المختارة غير موجودة',
         ];
     }

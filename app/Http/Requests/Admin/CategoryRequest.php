@@ -2,18 +2,14 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class CategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $user = User::find(Auth::id());
-
-        return $user?->isAdmin();
+        return $this->user()?->isAdmin();
     }
 
     public function rules(): array

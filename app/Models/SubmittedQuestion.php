@@ -56,6 +56,16 @@ class SubmittedQuestion extends Model
         return $this->status === 'rejected';
     }
 
+    public function getDifficultyLabelAttribute(): string
+    {
+        return match ($this->difficulty) {
+            'medium' => 'متوسط',
+            'hard' => 'صعب',
+            'very_hard' => 'صعب جداً',
+            default => $this->difficulty,
+        };
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return match ($this->status) {

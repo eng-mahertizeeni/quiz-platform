@@ -12,8 +12,8 @@ class CheckActiveUser
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth::check() && !auth::user()->is_active) {
-            auth::logout();
+        if (Auth::check() && !Auth::user()->is_active) {
+            Auth::logout();
             return redirect()->route('login')
                 ->with('error', 'تم تعطيل حسابك. يرجى التواصل مع الإدارة.');
         }

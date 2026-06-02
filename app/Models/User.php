@@ -61,10 +61,11 @@ class User extends Authenticatable
 
     public function getWinRateAttribute(): float
     {
-        if ($this->games_played === 0) {
+        $played = (int) $this->games_played;
+        if ($played === 0) {
             return 0;
         }
-        return round(($this->games_won / $this->games_played) * 100, 1);
+        return round(((int) $this->games_won / $played) * 100, 1);
     }
 
     public function getAvatarUrlAttribute(): string

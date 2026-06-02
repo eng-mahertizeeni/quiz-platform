@@ -7,7 +7,6 @@ use App\Http\Requests\Admin\QuestionRequest;
 use App\Models\Category;
 use App\Models\Question;
 use App\Models\SubmittedQuestion;
-use App\Models\User;
 use App\Services\QuestionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,7 +58,7 @@ class QuestionController extends Controller
         }
 
         $data['points'] = Question::DIFFICULTY_POINTS[$data['difficulty']];
-        $data['status'] = 'active';
+        $data['status'] ??= 'active';
         $data['created_by'] = Auth::id();
 
         Question::create($data);
@@ -119,8 +118,7 @@ class QuestionController extends Controller
 
     public function approveSubmission(SubmittedQuestion $submission)
     {
-        $user = User::find(Auth::id());
-        $question = $this->questionService->approve($submission, $user);
+        $question = $this->questionService->approve($submission, Auth::user());
 
         return redirect()->route('admin.questions.submissions')
             ->with('success', 'تم قبول السؤال ونشره');
@@ -128,9 +126,8 @@ class QuestionController extends Controller
 
     public function rejectSubmission(Request $request, SubmittedQuestion $submission)
     {        
-        $user = User::find(Auth::id());
         $request->validate(['reason' => 'required|string|max:500']);
-        $this->questionService->reject($submission, $user, $request->reason);
+        $this->questionService->reject($submission, Auth::user(), $request->reason);
 
         return redirect()->route('admin.questions.submissions')
             ->with('success', 'تم رفض السؤال');

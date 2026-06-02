@@ -60,7 +60,7 @@
                 @forelse($stats['recent_games'] as $g)
                 <div class="d-flex justify-content-between align-items-center py-1">
                     <span>{{ $g->teams->first()?->name ?? '--' }} vs {{ $g->teams->last()?->name ?? '--' }}</span>
-                    <span class="{{ $g->winner?->id === auth()->user()->id ? 'text-success' : 'text-muted' }}">{{ $g->winner?->score ?? 0 }}</span>
+                    <span class="{{ $g->scores->where('user_id', auth()->id())->first()?->is_winner ? 'text-success' : 'text-muted' }}">{{ $g->winner?->score ?? 0 }}</span>
                 </div>
                 @empty
                 <p class="text-muted mb-0 small">لا توجد ألعاب سابقة</p>

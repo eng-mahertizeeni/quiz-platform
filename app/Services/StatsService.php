@@ -13,29 +13,23 @@ class StatsService
 {
     public function getLeaderboard(int $limit = 10): \Illuminate\Support\Collection
     {
-        $data = Cache::flexible('leaderboard', [300, 600], function () use ($limit) {
+        return Cache::flexible('leaderboard', [300, 600], function () use ($limit) {
             return User::where('role', 'user')
                 ->where('games_played', '>', 0)
                 ->orderByDesc('total_score')
                 ->limit($limit)
-                ->get()
-                ->toArray();
+                ->get();
         });
-
-        return User::hydrate($data);
     }
 
     public function getMostPlayedCategories(int $limit = 10): \Illuminate\Support\Collection
     {
-        $data = Cache::flexible('most_played_categories', [600, 900], function () use ($limit) {
+        return Cache::flexible('most_played_categories', [600, 900], function () use ($limit) {
             return Category::active()
                 ->orderByDesc('times_played')
                 ->limit($limit)
-                ->get()
-                ->toArray();
+                ->get();
         });
-
-        return Category::hydrate($data);
     }
 
     public function getHardestQuestions(int $limit = 10): \Illuminate\Support\Collection

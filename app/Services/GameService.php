@@ -21,7 +21,7 @@ class GameService
                 'status' => 'waiting',
                 'timer_seconds' => $data['timer_seconds'] ?? 30,
                 'sound_enabled' => $data['sound_enabled'] ?? true,
-                'total_questions' => 36,
+                'total_questions' => 0,
             ]);
 
             $teamOne = GameTeam::create([
@@ -51,6 +51,8 @@ class GameService
             }
             $session->categories()->sync($pivot);
             $this->generateRounds($session);
+            $totalQuestions = $session->rounds()->count();
+            $session->update(['total_questions' => $totalQuestions]);
         });
     }
 
@@ -258,10 +260,5 @@ class GameService
 
         $creator = $session->creator;
         $creator->increment('games_played');
-
-        $teamOne = $session->teams->first();
-        if ($winner->is($teamOne)) {
-            $creator->increment('games_won');
-        }
     }
 }

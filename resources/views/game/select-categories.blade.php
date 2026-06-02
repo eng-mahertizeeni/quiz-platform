@@ -2,8 +2,8 @@
 @section('title', 'اختيار الفئات')
 @section('content')
 <div class="container py-4">
-    <h4 class="fw-bold mb-3"><i class="fas fa-tags text-warning me-2"></i>اختر 6 فئات للعبة</h4>
-    <p class="text-muted">اختر 6 فئات بالضبط. يجب أن تحتوي كل فئة على أسئلة كافية.</p>
+    <h4 class="fw-bold mb-3"><i class="fas fa-tags text-warning me-2"></i>اختر الفئات للعبة</h4>
+    <p class="text-muted">اختر من 1 إلى 6 فئات. يمكنك اختيار عدد أقل من الفئات للعبة أسرع.</p>
 
     <form method="POST" action="{{ route('game.categories.attach', $session->code) }}" id="categoriesForm">
         @csrf
@@ -41,7 +41,7 @@
         </div>
 
         <div class="mt-4 d-flex justify-content-between align-items-center">
-            <span class="text-muted" id="selectedCount">0 / 6 فئات مختارة</span>
+            <span class="text-muted" id="selectedCount">0 من 6 فئات مختارة</span>
             <button type="submit" class="btn btn-primary-custom btn-lg" id="submitBtn" disabled>تأكيد الاختيار</button>
         </div>
     </form>
@@ -71,8 +71,9 @@
         });
     });
     function updateUI() {
-        document.getElementById('selectedCount').innerText = selected.size + ' / 6 فئات مختارة';
-        document.getElementById('submitBtn').disabled = selected.size !== 6;
+        const count = selected.size;
+        document.getElementById('selectedCount').innerText = count + ' من 6 فئات مختارة';
+        document.getElementById('submitBtn').disabled = count < 1 || count > 6;
     }
 </script>
 @endpush

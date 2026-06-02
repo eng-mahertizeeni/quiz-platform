@@ -21,6 +21,6 @@ class GameSessionPolicy
     {
         return ($user->id === $session->created_by || $user->isAdmin())
             && $session->status === 'waiting'
-            && $session->categories()->count() === 6;
+            && $session->categories()->count() >= 1;
     }
 }
