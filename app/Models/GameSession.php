@@ -80,6 +80,9 @@ class GameSession extends Model
 
     public function getWinnerAttribute(): ?GameTeam
     {
+        if ($this->relationLoaded('teams')) {
+            return $this->teams->sortByDesc('score')->first();
+        }
         return $this->teams()->orderByDesc('score')->first();
     }
 

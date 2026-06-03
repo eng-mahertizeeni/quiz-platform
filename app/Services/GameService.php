@@ -260,5 +260,10 @@ class GameService
 
         $creator = $session->creator;
         $creator->increment('games_played');
+
+        if ($winner->name === $session->teams->first()->name) {
+            $creator->increment('games_won');
+            $creator->increment('total_score', $winner->score);
+        }
     }
 }

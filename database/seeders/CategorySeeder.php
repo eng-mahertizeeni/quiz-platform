@@ -28,6 +28,10 @@ class CategorySeeder extends Seeder
             ['name' => 'شخصيات تاريخية', 'slug' => 'historical-figures', 'icon' => 'crown', 'color' => '#7C3AED', 'is_featured' => true, 'sort_order' => 16],
             ['name' => 'أقوال مشهورة', 'slug' => 'quotes', 'icon' => 'quote-right', 'color' => '#F59E0B', 'is_featured' => true, 'sort_order' => 17],
             ['name' => 'عواصم وأعلام ودول', 'slug' => 'capitals', 'icon' => 'flag', 'color' => '#6366F1', 'is_featured' => true, 'sort_order' => 18],
+            ['name' => 'أدب وشعر', 'slug' => 'literature-poetry', 'icon' => 'book', 'color' => '#8B5CF6', 'is_featured' => true, 'sort_order' => 19],
+            ['name' => 'طبيعة وحيوان', 'slug' => 'nature-animals', 'icon' => 'paw', 'color' => '#10B981', 'is_featured' => true, 'sort_order' => 20],
+            ['name' => 'إسلاميات', 'slug' => 'islamic-knowledge', 'icon' => 'mosque', 'color' => '#059669', 'is_featured' => true, 'sort_order' => 21],
+            ['name' => 'مطبخ وأكلات', 'slug' => 'food-cuisine', 'icon' => 'utensils', 'color' => '#F59E0B', 'is_featured' => true, 'sort_order' => 22],
         ];
 
         foreach ($categories as $cat) {

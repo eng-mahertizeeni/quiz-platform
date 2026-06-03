@@ -190,6 +190,9 @@
                             <a class="btn btn-sm btn-info fw-bold text-dark" href="{{ route('practice.index') }}">
                                 <i class="fas fa-book-open me-1"></i>ممارسة
                             </a>
+                            <a class="btn btn-sm btn-warning fw-bold" href="{{ route('bluff.index') }}">
+                                <i class="fas fa-dice me-1"></i>Face Off
+                            </a>
                             <a class="btn btn-sm btn-success fw-bold" href="{{ route('game.create') }}">
                                 <i class="fas fa-play me-1"></i>لعبة جديدة
                             </a>
@@ -250,7 +253,7 @@
     </nav>
 
     {{-- Flash Messages --}}
-    @if(session('success') || session('error') || session('warning'))
+    @if(session('success') || session('error') || session('warning') || session('info'))
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x mt-4" style="z-index:9999">
         @if(session('success'))
         <div class="toast show align-items-center text-bg-success border-0 rounded-3 shadow-lg" role="alert">
@@ -267,6 +270,16 @@
             <div class="d-flex">
                 <div class="toast-body fw-bold">
                     <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        @endif
+        @if(session('info'))
+        <div class="toast show align-items-center text-bg-info border-0 rounded-3 shadow-lg" role="alert">
+            <div class="d-flex">
+                <div class="toast-body fw-bold">
+                    <i class="fas fa-info-circle me-2"></i>{{ session('info') }}
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>

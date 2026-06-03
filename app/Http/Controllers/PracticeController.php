@@ -18,19 +18,16 @@ class PracticeController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        $answeredCounts = UserQuestionAnswer::where('user_id', $user->id)
+        $answers = UserQuestionAnswer::where('user_id', $user->id)
             ->whereHas('question', fn($q) => $q->active())
             ->with('question.category')
             ->get()
-            ->groupBy(fn($a) => $a->question->category_id)
-            ->map(fn($items) => $items->count());
+            ->groupBy(fn($a) => $a->question->category_id);
 
         foreach ($categories as $cat) {
-            $cat->answered_count = $answeredCounts->get($cat->id, 0);
-            $cat->correct_count = UserQuestionAnswer::where('user_id', $user->id)
-                ->whereHas('question', fn($q) => $q->where('category_id', $cat->id)->active())
-                ->where('is_correct', true)
-                ->count();
+            $catAnswers = $answers->get($cat->id, collect());
+            $cat->answered_count = $catAnswers->count();
+            $cat->correct_count = $catAnswers->where('is_correct', true)->count();
             $cat->progress = $cat->questions_count > 0
                 ? round(($cat->answered_count / $cat->questions_count) * 100, 1)
                 : 0;

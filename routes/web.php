@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Game\GameController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\BluffController;
 use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionSubmissionController;
@@ -54,6 +55,22 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::post('/round/{round}/power/steal', [GameController::class, 'usePowerSteal'])->name('power.steal');
             });
         });
+    });
+
+    Route::prefix('bluff')->name('bluff.')->group(function () {
+        Route::get('/', [BluffController::class, 'index'])->name('index');
+        Route::post('/create', [BluffController::class, 'store'])->name('store');
+        Route::post('/join', [BluffController::class, 'join'])->name('join');
+        Route::get('/{code}/lobby', [BluffController::class, 'lobby'])->name('lobby');
+        Route::get('/{code}/lobby-data', [BluffController::class, 'lobbyData'])->name('lobby.data');
+        Route::post('/{code}/start', [BluffController::class, 'start'])->name('start');
+        Route::get('/{code}/play', [BluffController::class, 'play'])->name('play');
+        Route::get('/{code}/state', [BluffController::class, 'getState'])->name('state');
+        Route::post('/{code}/advance', [BluffController::class, 'advanceRound'])->name('advance');
+        Route::get('/{code}/results', [BluffController::class, 'results'])->name('results');
+        Route::post('/{code}/round/{round}/answer', [BluffController::class, 'submitAnswer'])->name('answer');
+        Route::post('/{code}/round/{round}/vote', [BluffController::class, 'submitVote'])->name('vote');
+        Route::get('/{code}/history', [BluffController::class, 'getHistory'])->name('history');
     });
 });
 
