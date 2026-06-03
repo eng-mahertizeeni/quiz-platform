@@ -1,0 +1,2592 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Quiz Platform API",
+        "description": "API documentation for Quiz Platform mobile app",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/admin/categories": {
+            "get": {
+                "tags": [
+                    "Admin Categories"
+                ],
+                "description": "List all categories (admin).",
+                "operationId": "71fce704423c89eab31adce4a23df70b",
+                "responses": {
+                    "200": {
+                        "description": "List of categories"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin Categories"
+                ],
+                "description": "Create a new category.",
+                "operationId": "810e8b9fee1619d4229208cb942c486a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Category name (English)",
+                                        "type": "string"
+                                    },
+                                    "name_ar": {
+                                        "description": "Category name (Arabic)",
+                                        "type": "string"
+                                    },
+                                    "slug": {
+                                        "description": "URL slug (auto-generated if empty)",
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "description": "Category description",
+                                        "type": "string"
+                                    },
+                                    "icon": {
+                                        "description": "Icon class or path",
+                                        "type": "string"
+                                    },
+                                    "color": {
+                                        "description": "Hex color code",
+                                        "type": "string"
+                                    },
+                                    "is_featured": {
+                                        "description": "Mark as featured",
+                                        "type": "boolean"
+                                    },
+                                    "is_active": {
+                                        "description": "Active status",
+                                        "type": "boolean"
+                                    },
+                                    "sort_order": {
+                                        "description": "Sort order",
+                                        "type": "integer"
+                                    },
+                                    "thumbnail": {
+                                        "description": "Thumbnail image (max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Category created"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/categories/{category}": {
+            "get": {
+                "tags": [
+                    "Admin Categories"
+                ],
+                "description": "Get a single category details.",
+                "operationId": "11a8aaa127a831f1b2178b277adfce70",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category details"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin Categories"
+                ],
+                "description": "Update a category.",
+                "operationId": "9ff914551245207200219040ba9b1232",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Category name",
+                                        "type": "string"
+                                    },
+                                    "name_ar": {
+                                        "description": "Category name (Arabic)",
+                                        "type": "string"
+                                    },
+                                    "slug": {
+                                        "description": "URL slug",
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "description": "Category description",
+                                        "type": "string"
+                                    },
+                                    "icon": {
+                                        "description": "Icon class or path",
+                                        "type": "string"
+                                    },
+                                    "color": {
+                                        "description": "Hex color code",
+                                        "type": "string"
+                                    },
+                                    "is_featured": {
+                                        "description": "Mark as featured",
+                                        "type": "boolean"
+                                    },
+                                    "is_active": {
+                                        "description": "Active status",
+                                        "type": "boolean"
+                                    },
+                                    "sort_order": {
+                                        "description": "Sort order",
+                                        "type": "integer"
+                                    },
+                                    "thumbnail": {
+                                        "description": "Thumbnail image (max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin Categories"
+                ],
+                "description": "Delete a category.",
+                "operationId": "1c50d201211dea34943f752a3cbb8e87",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/categories/{category}/featured": {
+            "post": {
+                "tags": [
+                    "Admin Categories"
+                ],
+                "description": "Toggle featured status of a category.",
+                "operationId": "f4311ff6ebedc7d9a71c3d825c4b84a7",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Featured status toggled"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/dashboard": {
+            "get": {
+                "tags": [
+                    "Admin Dashboard"
+                ],
+                "description": "Get admin dashboard statistics.",
+                "operationId": "f6e3ffeb3c9fb988ca2a77ad48e2c04c",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard stats"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/questions": {
+            "get": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "List questions with filtering.",
+                "operationId": "ddad86441ec7650058d36ddf17fa6018",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "difficulty",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of questions"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "Create a new question.",
+                "operationId": "adc662728a8214706967f5588bfa0074",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "category_id": {
+                                        "description": "Category ID",
+                                        "type": "integer"
+                                    },
+                                    "question_text": {
+                                        "description": "Question text",
+                                        "type": "string"
+                                    },
+                                    "question_text_ar": {
+                                        "description": "Question text (Arabic)",
+                                        "type": "string"
+                                    },
+                                    "answer_a": {
+                                        "description": "Answer A",
+                                        "type": "string"
+                                    },
+                                    "answer_b": {
+                                        "description": "Answer B",
+                                        "type": "string"
+                                    },
+                                    "answer_c": {
+                                        "description": "Answer C",
+                                        "type": "string"
+                                    },
+                                    "answer_d": {
+                                        "description": "Answer D",
+                                        "type": "string"
+                                    },
+                                    "correct_answer": {
+                                        "description": "Correct answer letter",
+                                        "type": "string",
+                                        "enum": [
+                                            "a",
+                                            "b",
+                                            "c",
+                                            "d"
+                                        ]
+                                    },
+                                    "difficulty": {
+                                        "description": "Difficulty level",
+                                        "type": "string",
+                                        "enum": [
+                                            "medium",
+                                            "hard",
+                                            "very_hard"
+                                        ]
+                                    },
+                                    "status": {
+                                        "description": "Question status",
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ]
+                                    },
+                                    "image": {
+                                        "description": "Image (max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Question created"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/questions/{question}": {
+            "get": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "Get a single question details.",
+                "operationId": "7d3fdf49ca4c94e3b79b12645005190a",
+                "parameters": [
+                    {
+                        "name": "question",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Question details"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "Update a question.",
+                "operationId": "d45bcef7f84450d3d1ee4b8d17b96979",
+                "parameters": [
+                    {
+                        "name": "question",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "question_text": {
+                                        "type": "string"
+                                    },
+                                    "question_text_ar": {
+                                        "type": "string"
+                                    },
+                                    "answer_a": {
+                                        "type": "string"
+                                    },
+                                    "answer_b": {
+                                        "type": "string"
+                                    },
+                                    "answer_c": {
+                                        "type": "string"
+                                    },
+                                    "answer_d": {
+                                        "type": "string"
+                                    },
+                                    "correct_answer": {
+                                        "type": "string",
+                                        "enum": [
+                                            "a",
+                                            "b",
+                                            "c",
+                                            "d"
+                                        ]
+                                    },
+                                    "difficulty": {
+                                        "type": "string",
+                                        "enum": [
+                                            "medium",
+                                            "hard",
+                                            "very_hard"
+                                        ]
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ]
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Question updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "Delete a question.",
+                "operationId": "ab499abba7ed6ed90739255e8e31c519",
+                "parameters": [
+                    {
+                        "name": "question",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Question deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/questions-submissions": {
+            "get": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "List question submissions.",
+                "operationId": "117c81bda718fed6f5fe07281eb8c5cf",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status (pending, approved, rejected)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of submissions"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/questions-submissions/{submission}": {
+            "get": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "Get a single submission for review.",
+                "operationId": "53e4258ff6357537a6bbf762ff663001",
+                "parameters": [
+                    {
+                        "name": "submission",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Submission details"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/questions-submissions/{submission}/approve": {
+            "post": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "Approve a submitted question.",
+                "operationId": "a150fdf0be74953f76b57bd7b9beae74",
+                "parameters": [
+                    {
+                        "name": "submission",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Submission approved"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/questions-submissions/{submission}/reject": {
+            "post": {
+                "tags": [
+                    "Admin Questions"
+                ],
+                "description": "Reject a submitted question with a reason.",
+                "operationId": "ecafb9f2e27f326d53a569f403d17522",
+                "parameters": [
+                    {
+                        "name": "submission",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "reason": {
+                                        "description": "Rejection reason (max 500 chars)",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Submission rejected"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users": {
+            "get": {
+                "tags": [
+                    "Admin Users"
+                ],
+                "description": "List all users.",
+                "operationId": "9ded17315e13756cd593b5840cd39a26",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of users"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{user}": {
+            "get": {
+                "tags": [
+                    "Admin Users"
+                ],
+                "description": "Get user details with game sessions and submissions.",
+                "operationId": "1755e6ac1393c92a407ec78308857c0e",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin Users"
+                ],
+                "description": "Delete a user account.",
+                "operationId": "30b96bca56895875c78781639320f633",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden - Cannot delete admin"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{user}/toggle-status": {
+            "post": {
+                "tags": [
+                    "Admin Users"
+                ],
+                "description": "Toggle active/inactive status of a user.",
+                "operationId": "085463dd33b06a26723faedb783f0795",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status toggled"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "description": "Register a new user account.",
+                "operationId": "8e4e3cb7b46126f4696379d3c7eeb4ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "User full name",
+                                        "type": "string"
+                                    },
+                                    "username": {
+                                        "description": "Unique username (alpha_dash)",
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "description": "Unique email address",
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "description": "Minimum 8 characters",
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Must match password",
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "description": "Login with email and password.",
+                "operationId": "222b2625838e3c57e017987f73598fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "description": "User email",
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "description": "User password",
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "422": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "description": "Logout and revoke current token.",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "description": "Get the authenticated user's profile.",
+                "operationId": "961ad57987905b44ae2e2f40b82e76de",
+                "responses": {
+                    "200": {
+                        "description": "User profile data"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff": {
+            "get": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "List user's bluff games (active and past).",
+                "operationId": "dc90692667ff419d2360f3546630ab9c",
+                "responses": {
+                    "200": {
+                        "description": "List of bluff games"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Create a new bluff game.",
+                "operationId": "cf34c50587c207defc491c7540b5541e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "total_rounds": {
+                                        "description": "Number of rounds (3-15)",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Game created"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/join": {
+            "post": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Join an existing bluff game by code.",
+                "operationId": "08e13aac80b4c437e63b491428333044",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "code": {
+                                        "description": "Game code to join",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Joined game"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/{code}/lobby": {
+            "get": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Get lobby data for a bluff game.",
+                "operationId": "2990887f180c6d8c957a407ef67b68b5",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lobby data"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/{code}/start": {
+            "post": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Start a bluff game (creator only).",
+                "operationId": "1fb91e3176ef1e1d3498403439843774",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game started"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/{code}/state": {
+            "get": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Get the current game state for playing.",
+                "operationId": "4503bfa924b7a8c9af82afb93afa15dd",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game state"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/{code}/round/{round}/answer": {
+            "post": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Submit a bluff answer for the current round.",
+                "operationId": "4550969c76b41d6245860b912a658a24",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "round",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "answer_text": {
+                                        "description": "Your fake answer text",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Answer submitted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/{code}/round/{round}/vote": {
+            "post": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Vote for a bluff answer.",
+                "operationId": "d035654b4b1f0f4b4f860d9b4ef7ae05",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "round",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "answer_id": {
+                                        "description": "Answer ID to vote for",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Vote submitted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/{code}/advance": {
+            "post": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Advance to the next round (creator only).",
+                "operationId": "51f3454ea2743a486c9fef7cc311a488",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Next round started"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/{code}/results": {
+            "get": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Get final results of a finished bluff game.",
+                "operationId": "d662a6a08127af3596012de894213024",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Final results"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/bluff/{code}/history": {
+            "get": {
+                "tags": [
+                    "Bluff"
+                ],
+                "description": "Get round-by-round history of a finished bluff game.",
+                "operationId": "450607ce48c232be410dda22009955bc",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Round history"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "description": "List all active categories with question counts.",
+                "operationId": "ac9c4d978ea4e5b72915ca9728e5b8b1",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Accept-Language"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of categories"
+                    }
+                }
+            }
+        },
+        "/api/categories/{id}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "description": "Get a single category with questions.",
+                "operationId": "09767bb2e47dde77dd1e2591428b0ae1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category details"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                }
+            }
+        },
+        "/api/games": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "List user's game sessions.",
+                "operationId": "e333e2e46e6c7bd4c254fe379b7389dd",
+                "responses": {
+                    "200": {
+                        "description": "List of games"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Create a new game session.",
+                "operationId": "496a1db2ab2b344c40cad9e98d332d9e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "team_one_name": {
+                                        "description": "Name of team one",
+                                        "type": "string"
+                                    },
+                                    "team_two_name": {
+                                        "description": "Name of team two (must differ)",
+                                        "type": "string"
+                                    },
+                                    "team_one_color": {
+                                        "description": "Hex color for team one",
+                                        "type": "string"
+                                    },
+                                    "team_two_color": {
+                                        "description": "Hex color for team two",
+                                        "type": "string"
+                                    },
+                                    "timer_seconds": {
+                                        "description": "Timer per question (10-120)",
+                                        "type": "integer"
+                                    },
+                                    "sound_enabled": {
+                                        "description": "Enable sound effects",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Game created"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}/categories": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Get available categories for a game session.",
+                "operationId": "f1c26b6ba033b8abfe035b88b9f26ae8",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "description": "Game code or ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Categories list"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Attach categories to a game session.",
+                "operationId": "72bac3db387e0a40e60fede7e6f5b449",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "description": "Game code or ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "category_ids": {
+                                        "description": "Array of category IDs",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Categories attached"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}/start": {
+            "post": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Start the game session.",
+                "operationId": "52b37498bc807b416b0353b5da228891",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "description": "Game code or ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game started"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Cannot start"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}/board": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Get the game board with categories and rounds.",
+                "operationId": "bdd51454281cbeb9afe3a56628bbcd49",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "description": "Game code or ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game board data"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}/round/{round}/question": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Get the question for a specific round.",
+                "operationId": "1f5df764e673e4f5259e06ef97179665",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "round",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Question data"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}/round/{round}/answer": {
+            "post": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Submit an answer for a round.",
+                "operationId": "f8620109590e686c31035e91734eb7c0",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "round",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "team_id": {
+                                        "description": "Team ID submitting the answer",
+                                        "type": "integer"
+                                    },
+                                    "answer": {
+                                        "description": "Selected answer",
+                                        "type": "string",
+                                        "enum": [
+                                            "a",
+                                            "b",
+                                            "c",
+                                            "d"
+                                        ]
+                                    },
+                                    "time_taken": {
+                                        "description": "Time taken in seconds",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Answer result"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}/round/{round}/power/remove": {
+            "post": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Use the remove-two-answers power.",
+                "operationId": "bc9a9a06bdb967793c15d4ebaaf65cfd",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "round",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "team_id": {
+                                        "description": "Team ID using the power",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Wrong answers removed"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}/round/{round}/power/steal": {
+            "post": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Use the steal question power.",
+                "operationId": "2c2132ae0abaa6a8a6cbc5ae635e39c7",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "round",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "team_id": {
+                                        "description": "Team ID stealing the question",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Question stolen"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}/result": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Get the final result of a finished game.",
+                "operationId": "05ff614acac053a19e6a8d8a5c67054f",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game result"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/games/{session}": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "description": "Get a single game session details.",
+                "operationId": "a07c021f1939e452273bdb0447a68488",
+                "parameters": [
+                    {
+                        "name": "session",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game details"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/leaderboard": {
+            "get": {
+                "tags": [
+                    "Leaderboard"
+                ],
+                "description": "Get top players leaderboard.",
+                "operationId": "37bfd93965c4196ae2a7dd0146db198b",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of top players",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Leaderboard data"
+                    }
+                }
+            }
+        },
+        "/api/leaderboard/statistics": {
+            "get": {
+                "tags": [
+                    "Leaderboard"
+                ],
+                "description": "Get platform statistics including hardest questions and most played categories.",
+                "operationId": "c26311c99be821ecbc3843d52ac47df8",
+                "responses": {
+                    "200": {
+                        "description": "Statistics data"
+                    }
+                }
+            }
+        },
+        "/api/leaderboard/categories": {
+            "get": {
+                "tags": [
+                    "Leaderboard"
+                ],
+                "description": "Get categories ranked by times played.",
+                "operationId": "edbde7d4f44f2f5c26b2db848fe71e7e",
+                "responses": {
+                    "200": {
+                        "description": "Category stats"
+                    }
+                }
+            }
+        },
+        "/api/leaderboard/user-stats": {
+            "get": {
+                "tags": [
+                    "Leaderboard"
+                ],
+                "description": "Get authenticated user's personal statistics.",
+                "operationId": "5c6a74dcb9c9d3ff170d2465ea49a902",
+                "responses": {
+                    "200": {
+                        "description": "User stats"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/practice/categories": {
+            "get": {
+                "tags": [
+                    "Practice"
+                ],
+                "description": "Get categories with user's practice progress.",
+                "operationId": "b4bc90769f934007c3560d2018e784ab",
+                "responses": {
+                    "200": {
+                        "description": "Categories with progress"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/practice/{category}": {
+            "get": {
+                "tags": [
+                    "Practice"
+                ],
+                "description": "Get next unanswered question for a category.",
+                "operationId": "606e6f6f94eca6e1e98dc8266eb67c19",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Question data"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/practice/answer": {
+            "post": {
+                "tags": [
+                    "Practice"
+                ],
+                "description": "Submit an answer for a practice question.",
+                "operationId": "b62e47be2802fb53dd63ac7873f0f0b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "question_id": {
+                                        "description": "Question ID",
+                                        "type": "integer"
+                                    },
+                                    "answer": {
+                                        "description": "Selected answer",
+                                        "type": "string",
+                                        "enum": [
+                                            "a",
+                                            "b",
+                                            "c",
+                                            "d"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Answer result"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/profile": {
+            "get": {
+                "tags": [
+                    "Profile"
+                ],
+                "description": "Get authenticated user's profile details.",
+                "operationId": "f1784685f8270527da017b3616288443",
+                "responses": {
+                    "200": {
+                        "description": "Profile data"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "description": "Update user profile information.",
+                "operationId": "df42d7bd8c9605adf2e62002661ca9f3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "User full name",
+                                        "type": "string"
+                                    },
+                                    "username": {
+                                        "description": "Unique username (alpha_dash)",
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "description": "Unique email address",
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "avatar": {
+                                        "description": "Avatar image (jpg,jpeg,png,webp max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Profile"
+                ],
+                "description": "Delete the authenticated user's account.",
+                "operationId": "696324677bc8a587bf01679e38cf9989",
+                "responses": {
+                    "200": {
+                        "description": "Account deleted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/password": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "description": "Update user password.",
+                "operationId": "873e5adb1708cf665922412814291bd1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "current_password": {
+                                        "description": "Current password",
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password": {
+                                        "description": "New password (min 8 chars)",
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Confirm new password",
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password updated"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/questions/submit": {
+            "post": {
+                "tags": [
+                    "Questions"
+                ],
+                "description": "Submit a new question for review.",
+                "operationId": "3f4435c7667ab7509dcb7872a951a66e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "category_id": {
+                                        "description": "Category ID",
+                                        "type": "integer"
+                                    },
+                                    "question_text": {
+                                        "description": "Question text (min 10 chars)",
+                                        "type": "string"
+                                    },
+                                    "answer_a": {
+                                        "description": "Answer A",
+                                        "type": "string"
+                                    },
+                                    "answer_b": {
+                                        "description": "Answer B",
+                                        "type": "string"
+                                    },
+                                    "answer_c": {
+                                        "description": "Answer C",
+                                        "type": "string"
+                                    },
+                                    "answer_d": {
+                                        "description": "Answer D",
+                                        "type": "string"
+                                    },
+                                    "correct_answer": {
+                                        "description": "Correct answer letter",
+                                        "type": "string",
+                                        "enum": [
+                                            "a",
+                                            "b",
+                                            "c",
+                                            "d"
+                                        ]
+                                    },
+                                    "difficulty": {
+                                        "description": "Difficulty level",
+                                        "type": "string",
+                                        "enum": [
+                                            "medium",
+                                            "hard",
+                                            "very_hard"
+                                        ]
+                                    },
+                                    "image": {
+                                        "description": "Optional image (max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Question submitted"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/questions/my-submissions": {
+            "get": {
+                "tags": [
+                    "Questions"
+                ],
+                "description": "Get authenticated user's submitted questions.",
+                "operationId": "55baf79ea1927be9212ed51a036a998b",
+                "responses": {
+                    "200": {
+                        "description": "List of submissions"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "Accept-Language": {
+                "name": "Accept-Language",
+                "in": "header",
+                "description": "Language code (ar, en)",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "default": "ar"
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearer_token": {
+                "type": "http",
+                "description": "Enter your bearer token",
+                "scheme": "bearer"
+            },
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Admin Categories",
+            "description": "Admin category management endpoints"
+        },
+        {
+            "name": "Admin Dashboard",
+            "description": "Admin dashboard endpoints"
+        },
+        {
+            "name": "Admin Questions",
+            "description": "Admin question management endpoints"
+        },
+        {
+            "name": "Admin Users",
+            "description": "Admin user management endpoints"
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "Bluff",
+            "description": "Bluff"
+        },
+        {
+            "name": "Categories",
+            "description": "Categories"
+        },
+        {
+            "name": "Games",
+            "description": "Games"
+        },
+        {
+            "name": "Leaderboard",
+            "description": "Leaderboard"
+        },
+        {
+            "name": "Practice",
+            "description": "Practice"
+        },
+        {
+            "name": "Profile",
+            "description": "Profile"
+        },
+        {
+            "name": "Questions",
+            "description": "Questions"
+        }
+    ]
+}
