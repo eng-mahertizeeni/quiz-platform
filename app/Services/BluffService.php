@@ -2,25 +2,29 @@
 
 namespace App\Services;
 
+use App\Helpers\ArabicHelper;
 use App\Models\BluffGame;
 use App\Models\BluffPlayer;
 use App\Models\BluffQuestion;
 use App\Models\BluffRound;
 use App\Models\BluffRoundAnswer;
 use App\Models\BluffVote;
-use Illuminate\Support\Facades\Cache;
+use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 
 class BluffService
 {
-    private const STATE_CACHE_TTL = 2;
-
-    public function createGame(int $userId, int $totalRounds = 8): BluffGame
+    public function createGame(int $userId, int $totalRounds = 8, array $selectedCategories = []): BluffGame
     {
-        return DB::transaction(function () use ($userId, $totalRounds) {
+        if (empty($selectedCategories)) {
+            throw new \InvalidArgumentException('يجب اختيار فقرة واحدة على الأقل');
+        }
+
+        return DB::transaction(function () use ($userId, $totalRounds, $selectedCategories) {
             $game = BluffGame::create([
                 'bluff_creator_id' => $userId,
                 'total_rounds' => $totalRounds,
+                'selected_categories' => $selectedCategories,
             ]);
 
             BluffPlayer::create([
@@ -55,22 +59,33 @@ class BluffService
     public function startGame(BluffGame $game): void
     {
         DB::transaction(function () use ($game) {
-            $questions = BluffQuestion::inRandomOrder()
-                ->limit($game->total_rounds)
-                ->get();
-
-            if ($questions->count() < $game->total_rounds) {
-                throw new \RuntimeException('لا يوجد عدد كافٍ من الأسئلة. تحتاج على الأقل ' . $game->total_rounds . ' سؤال.');
+            if (empty($game->selected_categories)) {
+                throw new \RuntimeException('لم يتم اختيار أي فقرة');
             }
+
+            // Verify each selected category has at least one question
+            foreach ($game->selected_categories as $catId) {
+                $count = BluffQuestion::where('category_id', $catId)->count();
+                if ($count === 0) {
+                    $cat = Category::find($catId);
+                    $name = $cat?->name ?? $catId;
+                    throw new \RuntimeException("لا توجد أسئلة في فقرة \"{$name}\"");
+                }
+            }
+
+            $players = $game->players()->orderBy('id')->get();
+            $numPlayers = $players->count();
 
             $now = now();
             $rounds = [];
-            foreach ($questions as $i => $question) {
+            for ($i = 1; $i <= $game->total_rounds; $i++) {
+                $selector = $players[($i - 1) % $numPlayers];
                 $rounds[] = [
                     'bluff_game_id' => $game->id,
-                    'bluff_question_id' => $question->id,
-                    'round_number' => $i + 1,
-                    'status' => 'answering',
+                    'bluff_question_id' => null,
+                    'selected_by_player_id' => $selector->id,
+                    'round_number' => $i,
+                    'status' => 'selecting',
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -85,47 +100,118 @@ class BluffService
         });
     }
 
+    public function selectCategory(BluffGame $game, BluffRound $round, BluffPlayer $player, int $categoryId): array
+    {
+        if ($game->status !== 'playing') {
+            return ['status' => 'error', 'message' => 'اللعبة لم تبدأ بعد'];
+        }
+        if ($round->status !== 'selecting') {
+            return ['status' => 'error', 'message' => 'تم اختيار الفقرة بالفعل'];
+        }
+        if ($round->selected_by_player_id !== $player->id) {
+            return ['status' => 'error', 'message' => 'ليس دورك لاختيار الفقرة'];
+        }
+
+        $selectedCats = $game->selected_categories ?? [];
+        if (!in_array($categoryId, $selectedCats)) {
+            return ['status' => 'error', 'message' => 'فقرة غير صالحة'];
+        }
+
+        $usedIds = BluffRound::where('bluff_game_id', $game->id)
+            ->whereNotNull('bluff_question_id')
+            ->pluck('bluff_question_id')
+            ->toArray();
+
+        $question = BluffQuestion::where('category_id', $categoryId)
+            ->whereNotIn('id', $usedIds)
+            ->inRandomOrder()
+            ->first();
+
+        if (!$question) {
+            return ['status' => 'error', 'message' => 'لا يوجد أسئلة كافية في هذه الفقرة'];
+        }
+
+        $round->update([
+            'bluff_question_id' => $question->id,
+            'category_id' => $categoryId,
+            'status' => 'answering',
+        ]);
+
+        return ['status' => 'ok'];
+    }
+
     public function getGameState(BluffGame $game): array
     {
-        $cacheKey = 'bluff_state_' . $game->id;
+        $authUserId = auth()->id();
 
-        return Cache::remember($cacheKey, self::STATE_CACHE_TTL, function () use ($game) {
-            $authUserId = auth()->id();
+        $game->load('players.user');
 
-            $game->load('players.user');
+        $currentRound = BluffRound::where('bluff_game_id', $game->id)
+            ->where('round_number', $game->current_round)
+            ->with('question')
+            ->first();
 
-            $currentRound = BluffRound::where('bluff_game_id', $game->id)
-                ->where('round_number', $game->current_round)
-                ->with('question')
-                ->first();
+        $authPlayer = $game->players->firstWhere('user_id', $authUserId);
 
-            $authPlayer = $game->players->firstWhere('user_id', $authUserId);
+        $players = $game->players->map(fn($p) => [
+            'id' => $p->id,
+            'user_id' => $p->user_id,
+            'name' => $p->user->name,
+            'avatar' => $p->user->avatar_url,
+            'total_score' => $p->total_score,
+        ])->values()->toArray();
 
-            $players = $game->players->map(fn($p) => [
-                'id' => $p->id,
-                'user_id' => $p->user_id,
-                'name' => $p->user->name,
-                'avatar' => $p->user->avatar_url,
-                'total_score' => $p->total_score,
-            ])->values()->toArray();
+        $scores = collect($players)
+            ->map(fn($p) => [
+                'player_name' => $p['name'],
+                'player_avatar' => $p['avatar'],
+                'total_score' => $p['total_score'],
+            ])
+            ->sortByDesc('total_score')
+            ->values()
+            ->toArray();
 
-            $scores = collect($players)
-                ->map(fn($p) => [
-                    'player_name' => $p['name'],
-                    'player_avatar' => $p['avatar'],
-                    'total_score' => $p['total_score'],
-                ])
-                ->sortByDesc('total_score')
-                ->values()
-                ->toArray();
+        $roundData = null;
+        if ($currentRound) {
+            if ($currentRound->status === 'selecting') {
+                $currentRound->load('selector');
 
-            $roundData = null;
-            if ($currentRound) {
+                $usedQIds = BluffRound::where('bluff_game_id', $game->id)
+                    ->whereNotNull('bluff_question_id')
+                    ->pluck('bluff_question_id')
+                    ->toArray();
+
+                $categories = [];
+                foreach (($game->selected_categories ?? []) as $catId) {
+                    $remaining = BluffQuestion::where('category_id', $catId)
+                        ->whereNotIn('id', $usedQIds)
+                        ->count();
+                    if ($remaining > 0) {
+                        $cat = Category::find($catId);
+                        if ($cat) {
+                            $categories[] = [
+                                'id' => $cat->id,
+                                'name' => $cat->name,
+                                'remaining_questions' => $remaining,
+                            ];
+                        }
+                    }
+                }
+
+                $roundData = [
+                    'id' => $currentRound->id,
+                    'round_number' => $currentRound->round_number,
+                    'status' => 'selecting',
+                    'is_selector' => $authPlayer && $currentRound->selected_by_player_id === $authPlayer->id,
+                    'selector_name' => $currentRound->selector?->user?->name ?? '—',
+                    'available_categories' => $categories,
+                ];
+            } else {
                 if ($currentRound->status === 'finished') {
                     $currentRound->load(['answers.player.user', 'answers.votes.voter.user']);
                 } elseif ($currentRound->status === 'voting') {
                     $currentRound->load('answers', 'votes');
-                } else {
+                } elseif ($currentRound->status === 'answering') {
                     $currentRound->load('answers');
                 }
 
@@ -152,40 +238,81 @@ class BluffService
                 $roundData['has_answered'] = $authPlayer && $answeredIds->contains($authPlayer->id);
 
                 if ($currentRound->status === 'voting') {
-                    $roundData['display_answers'] = $allAnswers->shuffle()->map(fn($a) => [
-                        'id' => $a->id,
-                        'answer_text' => $a->answer_text,
-                    ])->values();
+                    $realAnswer = $allAnswers->firstWhere('is_real_fake', true);
+                    $fakeAnswers = $allAnswers->where('is_real_fake', false);
+
+                    $grouped = $fakeAnswers->groupBy(fn($a) => $a->answer_text);
+                    $displayAnswers = $grouped->map(function ($group) {
+                        $first = $group->first();
+                        return [
+                            'id' => $first->id,
+                            'answer_text' => $first->answer_text,
+                            'playercount' => $group->count(),
+                        ];
+                    });
+
+                    if ($realAnswer) {
+                        $displayAnswers->push([
+                            'id' => $realAnswer->id,
+                            'answer_text' => $realAnswer->answer_text,
+                            'playercount' => 0,
+                        ]);
+                    }
+
+                    $roundData['display_answers'] = $displayAnswers->shuffle()->values();
                     $roundData['has_voted'] = $authPlayer && $voterIds->contains($authPlayer->id);
                 }
 
                 if ($currentRound->status === 'finished') {
-                    $roundData['results'] = $allAnswers->map(fn($a) => [
-                        'answer_text' => $a->answer_text,
-                        'is_real_fake' => $a->is_real_fake,
-                        'author_name' => $a->player?->user?->name ?? 'النظام',
-                        'vote_count' => $a->votes->count(),
-                        'voters' => $a->votes->map(fn($v) => $v->voter?->user?->name ?? '—')->filter()->values(),
-                        'each_point' => $a->is_real_fake ? 2 : 1,
-                    ])->shuffle()->values();
+                    $realAnswer = $allAnswers->firstWhere('is_real_fake', true);
+                    $fakeAnswers = $allAnswers->where('is_real_fake', false);
+
+                    $results = collect();
+                    $grouped = $fakeAnswers->groupBy(fn($a) => $a->answer_text);
+                    foreach ($grouped as $text => $group) {
+                        $totalVotes = $group->sum(fn($a) => $a->votes->count());
+                        $authors = $group->pluck('player.user.name')->filter();
+                        $voters = $group->flatMap(fn($a) => $a->votes->map(fn($v) => $v->voter?->user?->name ?? '—'))->filter();
+                        $results->push([
+                            'answer_text' => $text,
+                            'is_real_fake' => false,
+                            'authors' => $authors->values(),
+                            'author_count' => $group->count(),
+                            'vote_count' => $totalVotes,
+                            'voters' => $voters->values(),
+                        ]);
+                    }
+
+                    if ($realAnswer) {
+                        $results->push([
+                            'answer_text' => $realAnswer->answer_text,
+                            'is_real_fake' => true,
+                            'author_name' => 'النظام',
+                            'vote_count' => $realAnswer->votes->count(),
+                            'voters' => $realAnswer->votes->map(fn($v) => $v->voter?->user?->name ?? '—')->filter()->values(),
+                            'each_point' => 2,
+                        ]);
+                    }
+
+                    $roundData['results'] = $results->shuffle()->values();
                     $roundData['correct_answer_text'] = $currentRound->question?->correct_answer ?? '';
                     $roundData['all_voted'] = $voterIds->count() >= $game->players->count();
                 }
             }
+        }
 
-            return [
-                'id' => $game->id,
-                'code' => $game->code,
-                'status' => $game->status,
-                'current_round' => $game->current_round,
-                'total_rounds' => $game->total_rounds,
-                'players' => $players,
-                'current_round_data' => $roundData,
-                'scores' => $scores,
-                'is_creator' => $game->bluff_creator_id === $authUserId,
-                'is_spectator' => !$authPlayer,
-            ];
-        });
+        return [
+            'id' => $game->id,
+            'code' => $game->code,
+            'status' => $game->status,
+            'current_round' => $game->current_round,
+            'total_rounds' => $game->total_rounds,
+            'players' => $players,
+            'current_round_data' => $roundData,
+            'scores' => $scores,
+            'is_creator' => $game->bluff_creator_id === $authUserId,
+            'is_spectator' => !$authPlayer,
+        ];
     }
 
     public function submitAnswer(BluffGame $game, BluffRound $round, BluffPlayer $player, string $answerText): array
@@ -203,8 +330,12 @@ class BluffService
             return ['status' => 'error', 'message' => 'الإجابة يجب أن تكون على الأقل حرفين'];
         }
 
+        if (!$round->question) {
+            return ['status' => 'error', 'message' => 'لم يتم تحميل السؤال بعد'];
+        }
+
         $correctAnswer = $round->question->correct_answer;
-        if (mb_strtolower($trimmed) === mb_strtolower(trim($correctAnswer))) {
+        if (ArabicHelper::matches($trimmed, $correctAnswer)) {
             return [
                 'status' => 'correct_answer_rejected',
                 'message' => 'مبروك، عرفت الإجابة الصحيحة. اكتب إجابة أخرى لخداع اللاعبين.',
@@ -218,7 +349,6 @@ class BluffService
             'is_real_fake' => false,
         ]);
 
-        Cache::forget('bluff_state_' . $game->id);
         $this->checkAnswersComplete($round, $game);
 
         return ['status' => 'ok', 'message' => 'تم حفظ إجابتك'];
@@ -236,7 +366,12 @@ class BluffService
 
         $answer = BluffRoundAnswer::findOrFail($votedAnswerId);
 
-        if ($answer->bluff_player_id === $voter->id) {
+        $voterSameText = BluffRoundAnswer::where('bluff_round_id', $round->id)
+            ->where('answer_text', $answer->answer_text)
+            ->where('bluff_player_id', $voter->id)
+            ->exists();
+
+        if ($voterSameText) {
             return ['status' => 'error', 'message' => 'لا يمكنك التصويت على إجابتك الخاصة'];
         }
 
@@ -246,7 +381,6 @@ class BluffService
             'bluff_voted_answer_id' => $votedAnswerId,
         ]);
 
-        Cache::forget('bluff_state_' . $game->id);
         $allVoted = $this->checkVotesComplete($round, $game);
 
         return ['status' => 'ok', 'message' => 'تم تسجيل صوتك', 'round_complete' => $allVoted];
@@ -258,17 +392,16 @@ class BluffService
 
         if ($nextRound > $game->total_rounds) {
             $game->update(['status' => 'finished', 'finished_at' => now()]);
-            Cache::forget('bluff_state_' . $game->id);
             return false;
         }
 
         $game->update(['current_round' => $nextRound]);
 
+        $nextStatus = empty($game->selected_categories) ? 'answering' : 'selecting';
+
         BluffRound::where('bluff_game_id', $game->id)
             ->where('round_number', $nextRound)
-            ->update(['status' => 'answering']);
-
-        Cache::forget('bluff_state_' . $game->id);
+            ->update(['status' => $nextStatus]);
 
         return true;
     }
@@ -280,6 +413,8 @@ class BluffService
             ->count();
 
         if ($answerCount >= $game->players()->count()) {
+            if (!$round->question) return;
+
             BluffRoundAnswer::create([
                 'bluff_round_id' => $round->id,
                 'bluff_player_id' => null,
@@ -288,8 +423,6 @@ class BluffService
             ]);
 
             $round->update(['status' => 'voting']);
-
-            Cache::forget('bluff_state_' . $game->id);
         }
     }
 
@@ -299,7 +432,6 @@ class BluffService
 
         if ($voteCount >= $game->players()->count()) {
             $this->calculateRoundScores($round, $game);
-            Cache::forget('bluff_state_' . $game->id);
             return true;
         }
 
@@ -322,25 +454,36 @@ class BluffService
 
         $players = BluffPlayer::whereIn('id', $playerIds->unique())->get()->keyBy('id');
 
-        foreach ($round->answers as $answer) {
-            foreach ($answer->votes as $vote) {
-                $player = $players->get($vote->bluff_voter_id);
-                if (!$player) continue;
-                if ($answer->is_real_fake) {
-                    $player->increment('total_score', 2);
-                }
-            }
+        $realAnswer = $round->answers->firstWhere('is_real_fake', true);
+        $fakeAnswers = $round->answers->where('is_real_fake', false);
 
-            if (!$answer->is_real_fake && $answer->votes->count() > 0) {
-                $author = $players->get($answer->bluff_player_id);
-                if ($author) {
-                    $author->increment('total_score', $answer->votes->count());
+        // Correct answer detection: voter gets +2 regardless which copy they voted on
+        if ($realAnswer) {
+            foreach ($round->answers as $answer) {
+                foreach ($answer->votes as $vote) {
+                    if ($answer->answer_text === $realAnswer->answer_text) {
+                        $player = $players->get($vote->bluff_voter_id);
+                        if ($player) {
+                            $player->increment('total_score', 2);
+                        }
+                    }
                 }
             }
         }
 
+        // Fake answers: group by text, all authors share all votes on that text
+        $groupedByText = $fakeAnswers->groupBy(fn($a) => $a->answer_text);
+        foreach ($groupedByText as $text => $group) {
+            $totalVotes = $group->sum(fn($a) => $a->votes->count());
+            if ($totalVotes === 0) continue;
+
+            $authors = $players->whereIn('id', $group->pluck('bluff_player_id'));
+            foreach ($authors as $author) {
+                $author->increment('total_score', $totalVotes);
+            }
+        }
+
         $round->update(['status' => 'finished']);
-        Cache::forget('bluff_state_' . $game->id);
     }
 
     public function getFinalResults(BluffGame $game): array
@@ -371,13 +514,18 @@ class BluffService
                 'round_number' => $round->round_number,
                 'question_text' => $round->question?->question_text ?? '',
                 'correct_answer' => $round->question?->correct_answer ?? '',
-                'answers' => $round->answers->map(fn($a) => [
-                    'answer_text' => $a->answer_text,
-                    'is_real_fake' => $a->is_real_fake,
-                    'author_name' => $a->player?->user?->name ?? 'النظام',
-                    'vote_count' => $a->votes->count(),
-                    'voters' => $a->votes->map(fn($v) => $v->voter?->user?->name ?? '—')->filter()->values(),
-                ]),
+                'answers' => $round->answers
+                    ->groupBy(fn($a) => $a->answer_text)
+                    ->map(fn($group) => [
+                        'answer_text' => $group->first()->answer_text,
+                        'is_real_fake' => $group->first()->is_real_fake,
+                        'author_name' => $group->first()->is_real_fake
+                            ? 'النظام'
+                            : $group->pluck('player.user.name')->filter()->implode('، '),
+                        'author_count' => $group->count(),
+                        'vote_count' => $group->sum(fn($a) => $a->votes->count()),
+                        'voters' => $group->flatMap(fn($a) => $a->votes->map(fn($v) => $v->voter?->user?->name ?? '—'))->filter()->values(),
+                    ])->values(),
             ]);
     }
 }

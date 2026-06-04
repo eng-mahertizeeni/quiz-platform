@@ -18,6 +18,17 @@
                 </h1>
                 <p class="text-muted mb-4">أرسل هذا الكود لأصدقائك للانضمام</p>
 
+                @if($categories->isNotEmpty())
+                <div class="mb-4">
+                    <h5 class="mb-3"><i class="fas fa-tags me-2 text-warning"></i>الفقرات</h5>
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        @foreach($categories as $cat)
+                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">{{ $cat->name }}</span>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 <div class="mb-4">
                     <h5 class="mb-3"><i class="fas fa-users me-2 text-info"></i>اللاعبون ({{ $game->players->count() }})</h5>
                     <div id="playersList" class="d-flex flex-wrap justify-content-center gap-3">

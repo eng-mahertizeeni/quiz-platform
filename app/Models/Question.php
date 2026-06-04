@@ -15,6 +15,7 @@ class Question extends Model
         'answer_a', 'answer_b', 'answer_c', 'answer_d',
         'correct_answer', 'difficulty', 'points', 'image',
         'status', 'times_used', 'times_correct', 'times_wrong',
+        'hint_1', 'hint_2', 'hint_3', 'hint_4', 'hint_5',
     ];
 
     protected $casts = [

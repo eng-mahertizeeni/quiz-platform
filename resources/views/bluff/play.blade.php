@@ -25,6 +25,16 @@
                 <i class="fas fa-eye me-2"></i>أنت في وضع المشاهدة
             </div>
 
+            <div id="selectingPhase" class="card-custom p-4 text-center" style="display:none;">
+                <div class="mb-2">
+                    <span class="badge bg-primary fs-6">اختيار الفقرة</span>
+                </div>
+                <h5 class="mb-1" id="selectingMsg"></h5>
+                <p class="text-muted mb-3" id="selectingSubMsg"></p>
+                <div id="categoriesList" class="row g-3 mb-4"></div>
+                <div id="selectFeedback" class="mt-3"></div>
+            </div>
+
             <div id="questionPhase" class="card-custom p-4 text-center" style="display:none;">
                 <div class="mb-2">
                     <span class="badge bg-warning text-dark fs-6" id="roundBadge"></span>
@@ -190,7 +200,9 @@
             prevStatus = round.status;
         }
 
-        if (round.status === 'answering') {
+        if (round.status === 'selecting') {
+            showSelectingPhase(round, data);
+        } else if (round.status === 'answering') {
             showQuestionPhase(round, data);
         } else if (round.status === 'voting') {
             showVotingPhase(round, data);
@@ -211,7 +223,81 @@
             ).join('') + '</div>';
     }
 
+    function showSelectingPhase(round, data) {
+        document.getElementById('selectingPhase').style.display = 'block';
+        document.getElementById('questionPhase').style.display = 'none';
+        document.getElementById('votingPhase').style.display = 'none';
+        document.getElementById('resultsPhase').style.display = 'none';
+
+        const msg = document.getElementById('selectingMsg');
+        const subMsg = document.getElementById('selectingSubMsg');
+        const list = document.getElementById('categoriesList');
+        const fb = document.getElementById('selectFeedback');
+
+        if (round.is_selector && !isSpectator) {
+            msg.textContent = 'حان دورك! اختر فقرة للسؤال';
+            subMsg.textContent = '';
+            fb.innerHTML = '';
+
+            const cats = round.available_categories || [];
+            if (cats.length === 0) {
+                list.innerHTML = '<div class="col-12"><div class="alert alert-warning border-0 rounded-3">لا توجد فقرات متاحة</div></div>';
+                return;
+            }
+
+            list.innerHTML = cats.map(c =>
+                `<div class="col-md-6">
+                    <button class="btn btn-outline-primary w-100 p-3 fw-bold cat-btn"
+                            style="border-radius:12px; font-size:1.1rem; white-space:normal; height:100%;"
+                            onclick="selectCategory(${c.id})">
+                        ${esc(c.name)}
+                        <br><small class="text-muted">${c.remaining_questions} أسئلة</small>
+                    </button>
+                </div>`
+            ).join('');
+        } else {
+            msg.textContent = 'بانتظار اختيار الفقرة...';
+            subMsg.textContent = round.selector_name + ' يختار الفقرة الآن';
+            list.innerHTML = '';
+            fb.innerHTML = '';
+        }
+    }
+
+    function selectCategory(categoryId) {
+        const btns = document.querySelectorAll('.cat-btn');
+        btns.forEach(b => b.disabled = true);
+        document.getElementById('selectFeedback').innerHTML =
+            '<div class="alert alert-info border-0 rounded-3"><i class="fas fa-spinner fa-spin me-2"></i>جاري اختيار الفقرة...</div>';
+
+        fetch('/bluff/' + code + '/round/' + currentRoundId + '/select-category', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ category_id: categoryId })
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.status === 'ok') {
+                document.getElementById('selectFeedback').innerHTML =
+                    '<div class="alert alert-success border-0 rounded-3"><i class="fas fa-check me-2"></i>تم اختيار الفقرة! جاري تحميل السؤال...</div>';
+                setTimeout(() => { polling = false; poll(); }, 500);
+            } else {
+                document.getElementById('selectFeedback').innerHTML =
+                    '<div class="alert alert-danger border-0 rounded-3"><i class="fas fa-exclamation me-2"></i>' + esc(result.message) + '</div>';
+                btns.forEach(b => b.disabled = false);
+            }
+        })
+        .catch(() => {
+            document.getElementById('selectFeedback').innerHTML =
+                '<div class="alert alert-danger border-0 rounded-3">حدث خطأ، حاول مرة أخرى</div>';
+            btns.forEach(b => b.disabled = false);
+        });
+    }
+
     function showQuestionPhase(round, data) {
+        document.getElementById('selectingPhase').style.display = 'none';
         document.getElementById('questionPhase').style.display = 'block';
         document.getElementById('votingPhase').style.display = 'none';
         document.getElementById('resultsPhase').style.display = 'none';
@@ -248,6 +334,7 @@
     }
 
     function showVotingPhase(round, data) {
+        document.getElementById('selectingPhase').style.display = 'none';
         document.getElementById('questionPhase').style.display = 'none';
         document.getElementById('votingPhase').style.display = 'block';
         document.getElementById('resultsPhase').style.display = 'none';
@@ -267,15 +354,18 @@
             return;
         }
 
-        list.innerHTML = answers.map(a =>
-            `<div class="col-md-6">
+        list.innerHTML = answers.map(a => {
+            const countLabel = a.playercount > 1
+                ? ' <span class="badge bg-warning text-dark">' + a.playercount + ' لاعبين</span>'
+                : '';
+            return `<div class="col-md-6">
                 <button class="btn btn-outline-warning w-100 p-3 fw-bold vote-btn" data-id="${a.id}"
                         style="border-radius:12px; font-size:1.1rem; white-space:normal; height:100%;"
                         onclick="castVote(${a.id})">
-                    ${esc(a.answer_text)}
+                    ${esc(a.answer_text)}${countLabel}
                 </button>
-            </div>`
-        ).join('');
+            </div>`;
+        }).join('');
     }
 
     function castVote(answerId) {
@@ -313,6 +403,7 @@
     }
 
     function showResultsPhase(round, data) {
+        document.getElementById('selectingPhase').style.display = 'none';
         document.getElementById('questionPhase').style.display = 'none';
         document.getElementById('votingPhase').style.display = 'none';
         document.getElementById('resultsPhase').style.display = 'block';
@@ -348,14 +439,26 @@
                     </div>`;
                 }
 
+                const authors = r.authors && r.authors.length > 0
+                    ? r.authors.map(v => esc(v)).join('، ')
+                    : esc(r.author_name || '—');
+
+                const authorCountBadge = r.author_count > 1
+                    ? ' <span class="badge bg-warning text-dark">' + r.author_count + ' \u0643\u0627\u062A\u0628</span>'
+                    : '';
+
+                const pointsLine = r.vote_count > 0
+                    ? r.vote_count + ' \u0635\u0648\u062A \u00D7 ' + r.author_count + ' \u0643\u0627\u062A\u0628 = ' + (r.vote_count * r.author_count) + ' \u0646\u0642\u0637\u0629 \u0644\u0644\u0645\u062C\u0645\u0648\u0639\u0629'
+                    : '';
+
                 return `<div class="col-md-6 mb-3">
                     <div class="card-custom p-3 text-center h-100">
                         <div class="fw-bold mb-1" style="font-size:1.1rem;">${esc(r.answer_text)}</div>
-                        <div class="mb-1">${label}</div>
-                        <div class="small text-muted">${esc(r.author_name)}</div>
+                        <div class="mb-1">${label}${authorCountBadge}</div>
+                        <div class="small text-muted">${authors}</div>
                         ${votersHtml
                             ? '<div class="small mt-2"><strong>\u062E\u064F\u062F\u0639\u0648\u0627 \u0628\u0647\u0627:</strong> ' + votersHtml + '</div>' +
-                              '<div class="small text-warning fw-bold mt-1">' + r.vote_count + ' \u0635\u0648\u062A \u00d7 1 \u0646\u0642\u0637\u0629 = ' + r.vote_count + ' \u0646\u0642\u0637\u0629 \u0644\u0640 ' + esc(r.author_name) + '</div>'
+                              (pointsLine ? '<div class="small text-warning fw-bold mt-1">' + pointsLine + '</div>' : '')
                             : '<div class="small text-muted mt-2">\u0644\u0645 \u064A\u062E\u062A\u0631\u0647\u0627 \u0623\u062D\u062F</div>'}
                     </div>
                 </div>`;
@@ -468,19 +571,24 @@
                     return;
                 }
                 body.innerHTML = data.rounds.map(r => {
-                    const answersHtml = r.answers.map(a =>
-                        `<div class="d-flex justify-content-between align-items-center p-2 rounded-3 mb-1 ${a.is_real_fake ? 'border border-success' : ''}" style="background:var(--bg-card);">
+                    const answersHtml = r.answers.map(a => {
+                        const authorLabel = a.is_real_fake
+                            ? '<span class="badge bg-success">\u0635\u062D</span>'
+                            : (a.author_count > 1
+                                ? '<span class="badge bg-warning text-dark ms-1">' + a.author_count + ' \u0643\u062A\u0627\u0628</span>'
+                                : '');
+                        return `<div class="d-flex justify-content-between align-items-center p-2 rounded-3 mb-1 ${a.is_real_fake ? 'border border-success' : ''}" style="background:var(--bg-card);">
                             <div>
                                 <span class="fw-bold">${esc(a.answer_text)}</span>
-                                ${a.is_real_fake ? ' <span class="badge bg-success">\u0635\u062D</span>' : ''}
+                                ${authorLabel}
                                 <div class="small text-muted">${esc(a.author_name)}</div>
                             </div>
                             <div class="text-end small">
                                 ${a.vote_count > 0 ? a.vote_count + ' \u0635\u0648\u062A' : '\u0644\u0645 \u064A\u062E\u062A\u0631\u0647\u0627 \u0623\u062D\u062F'}
                                 ${a.voters.length > 0 ? '<br><span class="text-muted">' + a.voters.map(v => esc(v)).join(', ') + '</span>' : ''}
                             </div>
-                        </div>`
-                    ).join('');
+                        </div>`;
+                    }).join('');
 
                     return `<div class="mb-4">
                         <h6 class="fw-bold text-warning mb-2">\u062C\u0648\u0644\u0629 ${r.round_number}: ${esc(r.question_text)}</h6>

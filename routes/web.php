@@ -4,10 +4,13 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Game\GameController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BluffController;
+use App\Http\Controllers\KuraiyatController;
 use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionSubmissionController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/health', fn() => response()->json(['status' => 'ok']));
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/leaderboard', [HomeController::class, 'leaderboard'])->name('leaderboard');
@@ -68,9 +71,21 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{code}/state', [BluffController::class, 'getState'])->name('state');
         Route::post('/{code}/advance', [BluffController::class, 'advanceRound'])->name('advance');
         Route::get('/{code}/results', [BluffController::class, 'results'])->name('results');
+        Route::post('/{code}/round/{round}/select-category', [BluffController::class, 'selectCategory'])->name('select.category');
         Route::post('/{code}/round/{round}/answer', [BluffController::class, 'submitAnswer'])->name('answer');
         Route::post('/{code}/round/{round}/vote', [BluffController::class, 'submitVote'])->name('vote');
         Route::get('/{code}/history', [BluffController::class, 'getHistory'])->name('history');
+    });
+
+    Route::prefix('kuraiyat')->name('kuraiyat.')->group(function () {
+        Route::get('/', [KuraiyatController::class, 'index'])->name('index');
+        Route::post('/create', [KuraiyatController::class, 'store'])->name('store');
+        Route::get('/{code}/play', [KuraiyatController::class, 'play'])->name('play');
+        Route::get('/{code}/state', [KuraiyatController::class, 'state'])->name('state');
+        Route::get('/{code}/results', [KuraiyatController::class, 'results'])->name('results');
+        Route::get('/{code}/clue', [KuraiyatController::class, 'getClue'])->name('clue');
+        Route::post('/{code}/skip', [KuraiyatController::class, 'skipRound'])->name('skip');
+        Route::post('/answer', [KuraiyatController::class, 'submitAnswer'])->name('answer');
     });
 });
 

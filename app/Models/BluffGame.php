@@ -12,12 +12,13 @@ class BluffGame extends Model
     protected $table = 'bluff_games';
 
     protected $fillable = [
-        'bluff_creator_id', 'total_rounds', 'status', 'current_round', 'started_at', 'finished_at',
+        'bluff_creator_id', 'total_rounds', 'selected_categories', 'status', 'current_round', 'started_at', 'finished_at',
     ];
 
     protected function casts(): array
     {
         return [
+            'selected_categories' => 'array',
             'started_at' => 'datetime',
             'finished_at' => 'datetime',
         ];

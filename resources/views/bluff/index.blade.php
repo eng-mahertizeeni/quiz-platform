@@ -15,7 +15,7 @@
             <div class="card-custom p-4 h-100">
                 <h4 class="mb-3"><i class="fas fa-plus-circle text-success me-2"></i>إنشاء لعبة جديدة</h4>
                 <p class="text-muted mb-3">أنشئ غرفة وادعُ أصدقاءك للانضمام عبر كود اللعبة</p>
-                <form action="{{ route('bluff.store') }}" method="POST">
+                <form action="{{ route('bluff.store') }}" method="POST" id="createGameForm">
                     @csrf
                     <div class="mb-3">
                         <label class="form-label fw-bold">عدد الجولات</label>
@@ -25,7 +25,24 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary-custom w-100">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">اختر الفقرات <span class="text-danger">*</span></label>
+                        <div class="row g-2" id="categoriesContainer">
+                            @foreach($categories as $cat)
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input category-checkbox" type="checkbox"
+                                           name="categories[]" value="{{ $cat->id }}" id="cat{{ $cat->id }}">
+                                    <label class="form-check-label" for="cat{{ $cat->id }}">
+                                        {{ $cat->name }}
+                                    </label>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="text-danger small mt-1 d-none" id="categoryError">اختر فقرة واحدة على الأقل</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom w-100" id="createBtn">
                         <i class="fas fa-play me-1"></i>إنشاء اللعبة
                     </button>
                 </form>
@@ -130,3 +147,18 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('createGameForm')?.addEventListener('submit', function(e) {
+        const checked = document.querySelectorAll('.category-checkbox:checked');
+        const error = document.getElementById('categoryError');
+        if (checked.length === 0) {
+            e.preventDefault();
+            error.classList.remove('d-none');
+        } else {
+            error.classList.add('d-none');
+        }
+    });
+</script>
+@endpush

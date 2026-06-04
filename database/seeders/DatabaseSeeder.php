@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             QuestionSeeder::class,
             BluffQuestionSeeder::class,
+            WhoAmISeeder::class,
         ]);
     }
 }

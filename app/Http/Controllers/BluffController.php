@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\BluffGame;
 use App\Models\BluffPlayer;
+use App\Models\BluffQuestion;
 use App\Models\BluffRound;
+use App\Models\Category;
 use App\Services\BluffService;
 use Illuminate\Http\Request;
 
@@ -29,21 +31,36 @@ class BluffController extends Controller
             ->take(10)
             ->get();
 
-        return view('bluff.index', compact('activeGames', 'pastGames'));
+        $categoryIds = BluffQuestion::whereNotNull('category_id')
+            ->distinct()
+            ->pluck('category_id');
+
+        $categories = Category::whereIn('id', $categoryIds)
+            ->orderBy('name')
+            ->get();
+
+        return view('bluff.index', compact('activeGames', 'pastGames', 'categories'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'total_rounds' => 'integer|min:3|max:15',
+            'categories' => 'required|array|min:1',
+            'categories.*' => 'integer|exists:categories,id',
         ]);
 
-        $game = $this->bluffService->createGame(
-            auth()->id(),
-            $request->integer('total_rounds', 8)
-        );
+        try {
+            $game = $this->bluffService->createGame(
+                auth()->id(),
+                $request->integer('total_rounds', 8),
+                $request->input('categories')
+            );
 
-        return redirect()->route('bluff.lobby', $game->code);
+            return redirect()->route('bluff.lobby', $game->code);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     public function join(Request $request)
@@ -77,7 +94,9 @@ class BluffController extends Controller
 
         $isCreator = $game->bluff_creator_id === auth()->id();
 
-        return view('bluff.lobby', compact('game', 'isCreator'));
+        $categories = Category::whereIn('id', $game->selected_categories ?? [])->get();
+
+        return view('bluff.lobby', compact('game', 'isCreator', 'categories'));
     }
 
     public function start($code)
@@ -136,6 +155,32 @@ class BluffController extends Controller
         }
     }
 
+    public function selectCategory(Request $request, $code, BluffRound $round)
+    {
+        $game = BluffGame::where('code', $code)->firstOrFail();
+        $player = BluffPlayer::where('bluff_game_id', $game->id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$player) {
+            return response()->json(['status' => 'error', 'message' => 'أنت لست جزءاً من هذه اللعبة'], 403);
+        }
+
+        $request->validate(['category_id' => 'required|integer|exists:categories,id']);
+
+        if ($round->bluff_game_id !== $game->id) {
+            return response()->json(['status' => 'error', 'message' => 'جولة غير صالحة'], 400);
+        }
+
+        if ($round->round_number !== $game->current_round) {
+            return response()->json(['status' => 'error', 'message' => 'هذه الجولة غير نشطة حالياً'], 400);
+        }
+
+        $result = $this->bluffService->selectCategory($game, $round, $player, $request->category_id);
+
+        return response()->json($result);
+    }
+
     public function submitAnswer(Request $request, $code, BluffRound $round)
     {
         $game = BluffGame::where('code', $code)->firstOrFail();
@@ -155,6 +200,10 @@ class BluffController extends Controller
 
         if ($round->round_number !== $game->current_round) {
             return response()->json(['status' => 'error', 'message' => 'هذه الجولة غير نشطة حالياً'], 400);
+        }
+
+        if ($round->status !== 'answering') {
+            return response()->json(['status' => 'error', 'message' => 'هذه الجولة في حالة خطأ، يرجى التحديث'], 400);
         }
 
         $result = $this->bluffService->submitAnswer($game, $round, $player, $request->answer);

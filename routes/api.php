@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BluffGameController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\GameController;
+use App\Http\Controllers\Api\KuraiyatController;
 use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\PracticeController;
 use App\Http\Controllers\Api\ProfileController;
@@ -71,6 +72,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bluff/{code}/history', [BluffGameController::class, 'history']);
     Route::post('/bluff/{code}/round/{round}/answer', [BluffGameController::class, 'submitAnswer']);
     Route::post('/bluff/{code}/round/{round}/vote', [BluffGameController::class, 'submitVote']);
+
+    // Kuraiyat (أنا مين)
+    Route::get('/kuraiyat/games', [KuraiyatController::class, 'games']);
+    Route::get('/kuraiyat', [KuraiyatController::class, 'index']);
+    Route::post('/kuraiyat', [KuraiyatController::class, 'store']);
+    Route::get('/kuraiyat/{code}/state', [KuraiyatController::class, 'state']);
+    Route::post('/kuraiyat/{code}/answer', [KuraiyatController::class, 'submitAnswer']);
+    Route::get('/kuraiyat/{code}/clue', [KuraiyatController::class, 'clue']);
+    Route::post('/kuraiyat/{code}/skip', [KuraiyatController::class, 'skip']);
+    Route::get('/kuraiyat/{code}/results', [KuraiyatController::class, 'results']);
 
     // Question submissions
     Route::post('/questions/submit', [QuestionSubmissionController::class, 'store']);

@@ -15,6 +15,7 @@ class BluffGameResource extends JsonResource
             'status' => $this->status,
             'current_round' => $this->current_round,
             'total_rounds' => $this->total_rounds,
+            'selected_categories' => $this->selected_categories,
             'creator' => new UserResource($this->whenLoaded('creator')),
             'players' => $this->whenLoaded('players', function () {
                 return $this->players->map(fn($p) => [
