@@ -1,8 +1,7 @@
 #!/bin/sh
 set -e
 
-PORT="${PORT:-8000}"
-
+PORT="${PORT:-3000}"; 
 echo "=== Setting up Nginx port: $PORT ==="
 
 cat > /etc/nginx/http.d/default.conf << NGINX
@@ -94,6 +93,16 @@ php /app/artisan migrate --force --no-interaction 2>&1 || \
 echo "=== Running seeders ==="
 php /app/artisan db:seed --force --no-interaction 2>&1 || \
     echo "WARNING: Seeder failed — will retry on next deploy"
+
+echo "=== Testing PHP-FPM connection ==="
+php-fpm -F &
+sleep 2
+php -r "
+\$fp = @fsockopen('127.0.0.1', 9000, \$errno, \$errstr, 2);
+if (\$fp) { echo 'PORT 9000: OPEN'; fclose(\$fp); }
+else { echo 'PORT 9000: CLOSED - ' . \$errstr; }
+"
+kill %1 2>/dev/null; wait 2>/dev/null
 
 echo "=== Starting supervisor ==="
 exec /usr/bin/supervisord -c /etc/supervisord.conf

@@ -7,6 +7,7 @@ use App\Policies\GameSessionPolicy;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,5 +20,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(GameSession::class, GameSessionPolicy::class);
         Paginator::useBootstrapFive();
+
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
