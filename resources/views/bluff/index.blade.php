@@ -26,6 +26,15 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label fw-bold">مدة الإجابة والتصويت (ثانية)</label>
+                        <select name="question_duration" class="form-select">
+                            @foreach([15, 20, 25, 30, 35, 40] as $d)
+                                <option value="{{ $d }}" {{ $d === 30 ? 'selected' : '' }}>{{ $d }} ثانية</option>
+                            @endforeach
+                        </select>
+                        <div class="text-muted small mt-1"><i class="fas fa-info-circle me-1"></i>المدة تنطبق على مرحلتي الإجابة والتصويت معاً</div>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-bold">اختر الفقرات <span class="text-danger">*</span></label>
                         <div class="row g-2" id="categoriesContainer">
                             @foreach($categories as $cat)

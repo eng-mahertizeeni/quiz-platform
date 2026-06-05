@@ -46,6 +46,7 @@ class BluffController extends Controller
     {
         $request->validate([
             'total_rounds' => 'integer|min:3|max:15',
+            'question_duration' => 'integer|in:15,20,25,30,35,40',
             'categories' => 'required|array|min:1',
             'categories.*' => 'integer|exists:categories,id',
         ]);
@@ -54,7 +55,8 @@ class BluffController extends Controller
             $game = $this->bluffService->createGame(
                 auth()->id(),
                 $request->integer('total_rounds', 8),
-                $request->input('categories')
+                $request->input('categories'),
+                $request->integer('question_duration', 30)
             );
 
             return redirect()->route('bluff.lobby', $game->code);

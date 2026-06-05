@@ -10,20 +10,27 @@ use App\Models\BluffRound;
 use App\Models\BluffRoundAnswer;
 use App\Models\BluffVote;
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class BluffService
 {
-    public function createGame(int $userId, int $totalRounds = 8, array $selectedCategories = []): BluffGame
+    public function createGame(int $userId, int $totalRounds = 8, array $selectedCategories = [], int $questionDuration = 30): BluffGame
     {
         if (empty($selectedCategories)) {
             throw new \InvalidArgumentException('يجب اختيار فقرة واحدة على الأقل');
         }
 
-        return DB::transaction(function () use ($userId, $totalRounds, $selectedCategories) {
+        $allowed = [15, 20, 25, 30, 35, 40];
+        if (!in_array($questionDuration, $allowed)) {
+            $questionDuration = 30;
+        }
+
+        return DB::transaction(function () use ($userId, $totalRounds, $selectedCategories, $questionDuration) {
             $game = BluffGame::create([
                 'bluff_creator_id' => $userId,
                 'total_rounds' => $totalRounds,
+                'question_duration' => $questionDuration,
                 'selected_categories' => $selectedCategories,
             ]);
 
@@ -142,7 +149,7 @@ class BluffService
 
     public function getGameState(BluffGame $game): array
     {
-        $authUserId = auth()->id();
+        $authUserId = Auth::id();
 
         $game->load('players.user');
 
@@ -210,7 +217,7 @@ class BluffService
                 if ($currentRound->status === 'finished') {
                     $currentRound->load(['answers.player.user', 'answers.votes.voter.user']);
                 } elseif ($currentRound->status === 'voting') {
-                    $currentRound->load('answers', 'votes');
+                    $currentRound->load(['answers', 'votes', 'answers.votes']);
                 } elseif ($currentRound->status === 'answering') {
                     $currentRound->load('answers');
                 }
@@ -222,11 +229,17 @@ class BluffService
                     ?? $allAnswers->flatMap(fn($a) => $a->votes?->pluck('bluff_voter_id') ?? collect())
                     ?? collect();
 
+                $correctAnswer = $currentRound->question?->correct_answer ?? '';
+                $wordCount = $correctAnswer !== ''
+                    ? count(preg_split('/\s+/u', trim($correctAnswer)))
+                    : 0;
+
                 $roundData = [
                     'id' => $currentRound->id,
                     'round_number' => $currentRound->round_number,
                     'status' => $currentRound->status,
                     'question_text' => $currentRound->question?->question_text ?? '',
+                    'correct_answer_word_count' => $wordCount,
                     'total_players' => $game->players->count(),
                     'answers_submitted' => $allAnswers->where('is_real_fake', false)->count(),
                     'votes_cast' => $voterIds->count(),
@@ -307,6 +320,7 @@ class BluffService
             'status' => $game->status,
             'current_round' => $game->current_round,
             'total_rounds' => $game->total_rounds,
+            'question_duration' => $game->question_duration,
             'players' => $players,
             'current_round_data' => $roundData,
             'scores' => $scores,
@@ -338,7 +352,7 @@ class BluffService
         if (ArabicHelper::matches($trimmed, $correctAnswer)) {
             return [
                 'status' => 'correct_answer_rejected',
-                'message' => 'مبروك، عرفت الإجابة الصحيحة. اكتب إجابة أخرى لخداع اللاعبين.',
+                'message' => 'إجابتك قريبة جداً من الإجابة الصحيحة أو تطابقها. اكتب إجابة مختلفة تماماً لخداع اللاعبين.',
             ];
         }
 
@@ -442,7 +456,10 @@ class BluffService
     {
         $round->load('answers.votes');
 
-        $playerIds = collect();
+        // Start with ALL game players to prevent any player from being missed
+        $playerIds = $game->players()->pluck('bluff_players.id');
+
+        // Also include any voters or answer authors not already in the game players
         foreach ($round->answers as $answer) {
             foreach ($answer->votes as $vote) {
                 $playerIds->push($vote->bluff_voter_id);
@@ -459,9 +476,10 @@ class BluffService
 
         // Correct answer detection: voter gets +2 regardless which copy they voted on
         if ($realAnswer) {
+            $realAnswerText = $realAnswer->answer_text;
             foreach ($round->answers as $answer) {
                 foreach ($answer->votes as $vote) {
-                    if ($answer->answer_text === $realAnswer->answer_text) {
+                    if ($answer->answer_text === $realAnswerText) {
                         $player = $players->get($vote->bluff_voter_id);
                         if ($player) {
                             $player->increment('total_score', 2);
@@ -471,7 +489,7 @@ class BluffService
             }
         }
 
-        // Fake answers: group by text, all authors share all votes on that text
+        // Fake answers: group by text, each vote on a text gives 1 point to EACH author of that text
         $groupedByText = $fakeAnswers->groupBy(fn($a) => $a->answer_text);
         foreach ($groupedByText as $text => $group) {
             $totalVotes = $group->sum(fn($a) => $a->votes->count());

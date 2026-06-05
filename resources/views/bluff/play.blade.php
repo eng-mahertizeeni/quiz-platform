@@ -36,13 +36,17 @@
             </div>
 
             <div id="questionPhase" class="card-custom p-4 text-center" style="display:none;">
-                <div class="mb-2">
+                <div class="mb-2 d-flex justify-content-between align-items-center">
                     <span class="badge bg-warning text-dark fs-6" id="roundBadge"></span>
+                    <span id="answerTimer" class="badge bg-danger fs-6" style="display:none;">
+                        <i class="fas fa-hourglass-half me-1"></i><span id="answerTimerValue">30</span>ث
+                    </span>
                 </div>
                 <h3 class="mb-4" id="questionText"></h3>
 
                 <div class="mb-3" id="answerSection">
                     <label class="form-label fw-bold">اكتب إجابتك <span class="text-danger">*</span></label>
+                    <div id="wordCountHint" class="small text-muted mb-2" style="display:none;"></div>
                     <div class="input-group input-group-lg">
                         <input type="text" id="answerInput" class="form-control text-center"
                                placeholder="اكتب إجابتك هنا..." maxlength="255" autocomplete="off">
@@ -60,8 +64,11 @@
             </div>
 
             <div id="votingPhase" class="card-custom p-4 text-center" style="display:none;">
-                <div class="mb-2">
+                <div class="mb-2 d-flex justify-content-between align-items-center">
                     <span class="badge bg-info fs-6">التصويت</span>
+                    <span id="voteTimer" class="badge bg-danger fs-6" style="display:none;">
+                        <i class="fas fa-hourglass-half me-1"></i><span id="voteTimerValue">30</span>ث
+                    </span>
                 </div>
                 <h5 class="mb-3">اختر الإجابة التي تعتقد أنها الصحيحة:</h5>
                 <div id="answersList" class="row g-3 mb-4"></div>
@@ -111,6 +118,16 @@
 </div>
 @endsection
 
+<style>
+    .badge.pulse {
+        animation: pulse-anim 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-anim {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0.6; transform: scale(1.05); }
+    }
+</style>
+
 @push('scripts')
 <script>
     const code = '{{ $game->code }}';
@@ -122,6 +139,9 @@
     let prevRoundNumber = null;
     let resultsPhaseStart = null;
     let soundEnabled = localStorage.getItem('bluff_sound') !== 'off';
+    let answerCountdown = null;
+    let voteCountdown = null;
+    let questionDuration = 30;
 
     // XSS escape
     function esc(str) {
@@ -142,6 +162,66 @@
         if (sounds[name]) {
             try { new Audio(sounds[name]).play(); } catch(e) {}
         }
+    }
+
+    function startAnswerTimer(duration) {
+        clearInterval(answerCountdown);
+        const el = document.getElementById('answerTimerValue');
+        const container = document.getElementById('answerTimer');
+        let remaining = duration;
+        el.textContent = remaining;
+        container.style.display = 'inline-block';
+        container.className = 'badge bg-danger fs-6';
+        answerCountdown = setInterval(() => {
+            remaining--;
+            el.textContent = remaining;
+            if (remaining <= 5) container.className = 'badge bg-danger fs-6 pulse';
+            if (remaining <= 0) {
+                clearInterval(answerCountdown);
+                container.style.display = 'none';
+                const btn = document.getElementById('answerSubmitBtn');
+                const input = document.getElementById('answerInput');
+                if (!btn.disabled && input.value.trim()) {
+                    submitAnswer();
+                } else if (!btn.disabled) {
+                    btn.disabled = true;
+                    document.getElementById('answerFeedback').innerHTML =
+                        '<div class="alert alert-danger border-0 rounded-3 py-2"><i class="fas fa-clock me-2"></i>انتهى الوقت!</div>';
+                }
+            }
+        }, 1000);
+    }
+
+    function startVoteTimer(duration) {
+        clearInterval(voteCountdown);
+        const el = document.getElementById('voteTimerValue');
+        const container = document.getElementById('voteTimer');
+        let remaining = duration;
+        el.textContent = remaining;
+        container.style.display = 'inline-block';
+        container.className = 'badge bg-danger fs-6';
+        voteCountdown = setInterval(() => {
+            remaining--;
+            el.textContent = remaining;
+            if (remaining <= 5) container.className = 'badge bg-danger fs-6 pulse';
+            if (remaining <= 0) {
+                clearInterval(voteCountdown);
+                container.style.display = 'none';
+                const btns = document.querySelectorAll('.vote-btn');
+                if (btns.length > 0 && !btns[0].disabled) {
+                    btns.forEach(b => b.disabled = true);
+                    document.getElementById('voteFeedback').innerHTML =
+                        '<div class="alert alert-danger border-0 rounded-3"><i class="fas fa-clock me-2"></i>انتهى الوقت! لم تتمكن من التصويت.</div>';
+                }
+            }
+        }, 1000);
+    }
+
+    function stopTimers() {
+        clearInterval(answerCountdown);
+        clearInterval(voteCountdown);
+        document.getElementById('answerTimer').style.display = 'none';
+        document.getElementById('voteTimer').style.display = 'none';
     }
 
     function getState() {
@@ -183,6 +263,10 @@
         if (round.round_number !== prevRoundNumber) {
             prevRoundNumber = round.round_number;
             resultsPhaseStart = null;
+            stopTimers();
+        }
+        if (data.question_duration) {
+            questionDuration = data.question_duration;
         }
         currentRoundId = round.id;
         document.getElementById('roundLabel').textContent = '\u062C\u0648\u0644\u0629 ' + round.round_number + '/' + data.total_rounds;
@@ -305,6 +389,15 @@
         document.getElementById('roundBadge').textContent = '\u062C\u0648\u0644\u0629 ' + round.round_number;
         document.getElementById('questionText').textContent = round.question_text || '\u0627\u0644\u0633\u0624\u0627\u0644 \u063A\u064A\u0631 \u0645\u062A\u0648\u0641\u0631';
 
+        // Show word count hint
+        const wcHint = document.getElementById('wordCountHint');
+        if (round.correct_answer_word_count > 1) {
+            wcHint.textContent = '\u0627\u0644\u0625\u062C\u0627\u0628\u0629 \u062A\u062A\u0643\u0648\u0646 \u0645\u0646 ' + round.correct_answer_word_count + ' \u0643\u0644\u0645\u0627\u062A';
+            wcHint.style.display = 'block';
+        } else {
+            wcHint.style.display = 'none';
+        }
+
         const hasAnswered = !!round.has_answered;
         const input = document.getElementById('answerInput');
         const submitBtn = document.getElementById('answerSubmitBtn');
@@ -314,6 +407,8 @@
 
         if (isSpectator || hasAnswered) {
             ansSection.style.display = 'none';
+            document.getElementById('answerTimer').style.display = 'none';
+            clearInterval(answerCountdown);
             if (hasAnswered) {
                 feedback.innerHTML = '<div class="alert alert-success border-0 rounded-3"><i class="fas fa-check me-2"></i>\u062A\u0645 \u0625\u0631\u0633\u0627\u0644 \u0625\u062C\u0627\u0628\u062A\u0643</div>';
             }
@@ -322,6 +417,7 @@
             ansSection.style.display = 'block';
             feedback.innerHTML = '';
             waitingMsg.style.display = 'none';
+            startAnswerTimer(questionDuration);
             setTimeout(() => input.focus(), 100);
         }
 
@@ -343,6 +439,8 @@
         const answers = round.display_answers || [];
 
         if (round.has_voted || isSpectator) {
+            document.getElementById('voteTimer').style.display = 'none';
+            clearInterval(voteCountdown);
             list.innerHTML = '<div class="col-12"><div class="alert alert-success border-0 rounded-3"><i class="fas fa-check me-2"></i>' +
                 (isSpectator ? '\u0627\u0646\u062A\u0638\u0631 \u0646\u062A\u0627\u0626\u062C \u0627\u0644\u062A\u0635\u0648\u064A\u062A...' : '\u0644\u0642\u062F \u0635\u0648\u062A \u0628\u0627\u0644\u0641\u0639\u0644\u060C \u0627\u0646\u062A\u0638\u0631 \u0628\u0627\u0642\u064A \u0627\u0644\u0644\u0627\u0639\u0628\u064A\u0646...') +
                 '</div></div>';
@@ -350,9 +448,13 @@
         }
 
         if (answers.length === 0) {
+            document.getElementById('voteTimer').style.display = 'none';
+            clearInterval(voteCountdown);
             list.innerHTML = '<div class="col-12"><div class="alert alert-warning border-0 rounded-3">\u0644\u0627 \u062A\u0648\u062C\u062F \u0625\u062C\u0627\u0628\u0627\u062A \u0644\u0644\u0639\u0631\u0636</div></div>';
             return;
         }
+
+        startVoteTimer(questionDuration);
 
         list.innerHTML = answers.map(a => {
             const countLabel = a.playercount > 1
@@ -407,6 +509,7 @@
         document.getElementById('questionPhase').style.display = 'none';
         document.getElementById('votingPhase').style.display = 'none';
         document.getElementById('resultsPhase').style.display = 'block';
+        stopTimers();
 
         document.getElementById('resultsCorrectAnswer').textContent = round.correct_answer_text || '\u2014';
 
@@ -416,17 +519,169 @@
         if (results.length === 0) {
             list.innerHTML = '<div class="col-12"><p class="text-muted">\u0644\u0627 \u062A\u0648\u062C\u062F \u0646\u062A\u0627\u0626\u062C</p></div>';
         } else {
-            list.innerHTML = results.map(r => {
-                const label = r.is_real_fake
-                    ? '<span class="badge bg-success">\u2714 \u0627\u0644\u0625\u062C\u0627\u0628\u0629 \u0627\u0644\u0635\u062D\u064A\u062D\u0629</span>'
-                    : '<span class="badge bg-secondary">\u2718 \u0625\u062C\u0627\u0628\u0629 \u0645\u0632\u064A\u0641\u0629</span>';
-
-                let votersHtml = '';
-                if (r.voters && r.voters.length > 0) {
-                    votersHtml = r.voters.map(v =>
-                        '<span class="badge bg-dark me-1 mb-1">' + esc(v) + '</span>'
-                    ).join('');
+            // Calculate total points per player for this round
+            const pointsMap = {};
+            results.forEach(r => {
+                if (r.is_real_fake) {
+                    const pts = (r.vote_count || 0) * 2;
+                    (r.voters || []).forEach(v => {
+                        pointsMap[v] = (pointsMap[v] || 0) + 2;
+                    });
+                } else {
+                    const pts = (r.vote_count || 0);
+                    if (pts > 0 && r.authors) {
+                        r.authors.forEach(a => {
+                            pointsMap[a] = (pointsMap[a] || 0) + (r.vote_count || 0);
+                        });
+                    }
                 }
+            });
+
+            list.innerHTML = results.map(r => {
+                const isCorrect = r.is_real_fake;
+
+                if (isCorrect) {
+                    const voteCount = r.vote_count || 0;
+                    const totalPts = voteCount * 2;
+
+                    return `<div class="col-12 mb-3">
+                        <div class="card-custom p-3 text-center" style="border:2px solid var(--success); background:rgba(40,167,69,0.08);">
+                            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                                <span class="badge bg-success fs-6">
+                                    <i class="fas fa-check-circle me-1"></i>\u0627\u0644\u0625\u062C\u0627\u0628\u0629 \u0627\u0644\u0635\u062D\u064A\u062D\u0629
+                                </span>
+                            </div>
+                            <div class="fw-bold mb-2" style="font-size:1.4rem; color:var(--success);">${esc(r.answer_text)}</div>
+                            <div class="small text-muted mb-2">\u0643\u0627\u062A\u0628: ${esc(r.author_name || '\u0627\u0644\u0646\u0638\u0627\u0645')}</div>
+                            ${voteCount > 0 ? `
+                                <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap mb-2">
+                                    <span class="badge bg-success fs-6"><i class="fas fa-users me-1"></i>${voteCount} \u0635\u0648\u062A</span>
+                                    <span class="badge bg-warning text-dark fs-6"><i class="fas fa-star me-1"></i>${voteCount} \u00D7 2 = ${totalPts} \u0646\u0642\u0637\u0629</span>
+                                </div>
+                                <div class="small">\u0627\u0644\u0645\u0635\u0648\u062A\u0648\u0646: ${r.voters.map(v => '<span class="badge bg-dark me-1">' + esc(v) + '</span>').join('')}</div>
+                            ` : '<div class="text-muted small"><i class="fas fa-times me-1"></i>\u0644\u0645 \u064A\u062E\u062A\u0631\u0647\u0627 \u0623\u062D\u062F</div>'}
+                        </div>
+                    </div>`;
+                }
+
+                const voteCount = r.vote_count || 0;
+                const authors = r.authors && r.authors.length > 0
+                    ? r.authors.map(v => esc(v)).join('\u060C ')
+                    : esc(r.author_name || '\u2014');
+                const authorCount = r.author_count || 1;
+                const totalPts = voteCount * authorCount;
+
+                return `<div class="col-md-6 mb-3">
+                    <div class="card-custom p-3 text-center h-100" style="border:1px solid var(--border);">
+                        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                            <span class="badge bg-secondary"><i class="fas fa-times-circle me-1"></i>\u0625\u062C\u0627\u0628\u0629 \u0645\u0632\u064A\u0641\u0629</span>
+                            ${authorCount > 1 ? '<span class="badge bg-warning text-dark">' + authorCount + ' \u0643\u062A\u0627\u0628</span>' : ''}
+                        </div>
+                        <div class="fw-bold mb-1" style="font-size:1.2rem;">${esc(r.answer_text)}</div>
+                        <div class="small text-muted mb-2">\u0643\u062A\u0628: ${authors}</div>
+                        ${voteCount > 0 ? `
+                            <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap mb-2">
+                                <span class="badge bg-danger fs-6"><i class="fas fa-thumbs-up me-1"></i>${voteCount} \u0635\u0648\u062A</span>
+                                <span class="badge bg-warning text-dark fs-6"><i class="fas fa-gem me-1"></i>+${totalPts} \u0646\u0642\u0637\u0629</span>
+                            </div>
+                            <div class="small">\u062E\u064F\u062F\u0639\u0648\u0627 \u0628\u0647\u0627: ${r.voters.map(v => '<span class="badge bg-dark me-1">' + esc(v) + '</span>').join('')}</div>
+                        ` : '<div class="text-muted small"><i class="fas fa-ban me-1"></i>\u0644\u0645 \u064A\u062E\u062A\u0631\u0647\u0627 \u0623\u062D\u062F</div>'}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        const nextBtn = document.getElementById('nextRoundBtn');
+        const finalMsg = document.getElementById('finalRoundMsg');
+
+        if (data.current_round >= data.total_rounds) {
+            finalMsg.style.display = 'block';
+            nextBtn.style.display = 'none';
+            playSound('finish');
+            setTimeout(() => {
+                window.location.href = '/bluff/' + code + '/results';
+            }, 3000);
+        } else if (data.is_creator && !isSpectator) {
+            if (resultsPhaseStart === null) {
+                resultsPhaseStart = Date.now();
+            }
+            const elapsed = (Date.now() - resultsPhaseStart) / 1000;
+            const remaining = Math.max(0, 8 - Math.floor(elapsed));
+
+            nextBtn.style.display = 'inline-block';
+            nextBtn.innerHTML = '<i class="fas fa-arrow-left me-2"></i>\u0627\u0644\u062A\u0627\u0644\u064A (' + remaining + ')';
+            nextBtn.disabled = false;
+
+            if (remaining <= 0 && !nextBtn.dataset.advancing) {
+                nextBtn.dataset.advancing = '1';
+                nextBtn.disabled = true;
+                nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>\u062C\u0627\u0631\u064A...';
+                fetch('/bluff/' + code + '/advance', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.redirect) { window.location.href = d.redirect; return; }
+                    polling = false;
+                    poll();
+                })
+                .catch(() => {
+                    nextBtn.disabled = false;
+                    nextBtn.dataset.advancing = '';
+                    nextBtn.innerHTML = '<i class="fas fa-arrow-left me-2"></i>\u0627\u0644\u062A\u0627\u0644\u064A';
+                });
+                return;
+            }
+
+            nextBtn.onclick = function() {
+                this.dataset.advancing = '1';
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>\u062C\u0627\u0631\u064A...';
+                fetch('/bluff/' + code + '/advance', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.redirect) { window.location.href = d.redirect; return; }
+                    polling = false;
+                    poll();
+                })
+                .catch(() => {
+                    this.disabled = false;
+                    this.dataset.advancing = '';
+                    this.innerHTML = '<i class="fas fa-arrow-left me-2"></i>\u0627\u0644\u062A\u0627\u0644\u064A';
+                });
+            };
+        } else {
+            if (resultsPhaseStart === null) {
+                resultsPhaseStart = Date.now();
+            }
+            const elapsed = (Date.now() - resultsPhaseStart) / 1000;
+
+            if (elapsed > 20 && !nextBtn.dataset.advancing) {
+                nextBtn.dataset.advancing = '1';
+                fetch('/bluff/' + code + '/advance', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.redirect) { window.location.href = d.redirect; return; }
+                    polling = false;
+                    poll();
+                })
+                .catch(() => { nextBtn.dataset.advancing = ''; });
+                return;
+            }
+
+            nextBtn.style.display = 'none';
+            finalMsg.innerHTML = '<i class="fas fa-clock me-2"></i>\u0628\u0627\u0646\u062A\u0638\u0627\u0631 \u0627\u0644\u062A\u0642\u062F\u0645 \u0644\u0644\u062C\u0648\u0644\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629...';
+            finalMsg.className = 'alert alert-info border-0 rounded-3';
+            finalMsg.style.display = 'block';
+        }
+    }
 
                 if (r.is_real_fake) {
                     return `<div class="col-12 mb-3">
