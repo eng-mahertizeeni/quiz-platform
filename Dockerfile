@@ -9,11 +9,24 @@ ENV APP_ENV=${APP_ENV} \
     COMPOSER_MEMORY_LIMIT=-1
 
 RUN apk add --no-cache \
-    nginx supervisor curl \
-    libpng libjpeg-turbo freetype libwebp libxpm \
-    oniguruma libxml2 libzip icu \
-    npm mysql-client postgresql-client \
+    nginx \
+    supervisor \
+    curl \
+    nodejs \
+    npm \
+    mysql-client \
+    postgresql-client \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    libwebp \
+    libxpm \
+    oniguruma \
+    libxml2 \
+    libzip \
+    icu \
     && apk add --no-cache --virtual .build-deps \
+    $PHPIZE_DEPS \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
@@ -26,27 +39,31 @@ RUN apk add --no-cache \
     postgresql-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-xpm \
     && docker-php-ext-install -j$(nproc) \
-    pdo_mysql pdo_pgsql mbstring xml bcmath gd zip intl opcache exif \
+    pdo_mysql \
+    pdo_pgsql \
+    mbstring \
+    xml \
+    bcmath \
+    gd \
+    zip \
+    intl \
+    opcache \
+    exif \
     && apk del .build-deps \
     && rm -rf /var/cache/apk/* /tmp/*
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts
+
 COPY . .
-
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
-
-RUN cp .env.example .env && \
-    php artisan key:generate --force --no-interaction --quiet && \
-    rm .env
 
 RUN npm install --ignore-scripts --no-audit --no-fund && \
     npm run build && \
     rm -rf node_modules
-
-RUN php artisan storage:link --force || true
 
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
     chmod -R 775 /app/storage /app/bootstrap/cache

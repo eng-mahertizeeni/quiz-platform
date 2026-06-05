@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+PORT="${PORT:-8000}"
+
+echo "=== Setting up Nginx port: $PORT ==="
+sed -i "s/listen 8000/listen $PORT/g" /etc/nginx/http.d/default.conf
+
 echo "=== Setting up storage ==="
 mkdir -p /app/storage/framework/{sessions,views,cache,testing}
 mkdir -p /app/storage/app/public
