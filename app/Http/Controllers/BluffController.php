@@ -37,7 +37,11 @@ class BluffController extends Controller
 
         $categories = Category::whereIn('id', $categoryIds)
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($cat) {
+                $cat->questions_count = BluffQuestion::where('category_id', $cat->id)->count();
+                return $cat;
+            });
 
         return view('bluff.index', compact('activeGames', 'pastGames', 'categories'));
     }
@@ -67,12 +71,16 @@ class BluffController extends Controller
 
     public function join(Request $request)
     {
-        $request->validate(['code' => 'required|string|size:6']);
+        $request->validate([
+            'code' => 'required|string|size:6',
+            'display_name' => 'nullable|string|max:50',
+        ]);
 
         try {
             $game = $this->bluffService->joinGame(
                 strtoupper($request->code),
-                auth()->id()
+                auth()->id(),
+                $request->input('display_name')
             );
             return redirect()->route('bluff.lobby', $game->code);
         } catch (\Throwable $e) {
@@ -289,10 +297,29 @@ class BluffController extends Controller
             'status' => $game->status,
             'players' => $game->players->map(fn($p) => [
                 'id' => $p->id,
-                'name' => $p->user->name,
+                'name' => $p->display_name,
                 'avatar' => $p->user->avatar_url,
             ]),
             'is_creator' => $game->bluff_creator_id === auth()->id(),
         ]);
+    }
+
+    public function updateDisplayName(Request $request, $code)
+    {
+        $request->validate(['display_name' => 'required|string|max:50']);
+
+        $game = BluffGame::where('code', $code)->firstOrFail();
+
+        $player = BluffPlayer::where('bluff_game_id', $game->id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$player) {
+            return response()->json(['status' => 'error', 'message' => 'أنت لست جزءاً من هذه اللعبة'], 403);
+        }
+
+        $player->update(['display_name' => trim($request->input('display_name'))]);
+
+        return response()->json(['status' => 'ok', 'name' => $player->display_name]);
     }
 }

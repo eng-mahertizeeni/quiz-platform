@@ -142,6 +142,7 @@
     let answerCountdown = null;
     let voteCountdown = null;
     let questionDuration = 30;
+    let shuffledAnswerIds = null;
 
     // XSS escape
     function esc(str) {
@@ -219,7 +220,9 @@
 
     function stopTimers() {
         clearInterval(answerCountdown);
+        answerCountdown = null;
         clearInterval(voteCountdown);
+        voteCountdown = null;
         document.getElementById('answerTimer').style.display = 'none';
         document.getElementById('voteTimer').style.display = 'none';
     }
@@ -263,7 +266,25 @@
         if (round.round_number !== prevRoundNumber) {
             prevRoundNumber = round.round_number;
             resultsPhaseStart = null;
+            shuffledAnswerIds = null;
             stopTimers();
+            // Reset answer input for a new round's answering phase
+            if (round.status === 'answering') {
+                const inp = document.getElementById('answerInput');
+                const sbtn = document.getElementById('answerSubmitBtn');
+                inp.style.display = ''; inp.disabled = false; inp.value = '';
+                sbtn.style.display = ''; sbtn.disabled = false;
+                document.getElementById('answerFeedback').innerHTML = '';
+                document.getElementById('answerSection').style.display = 'block';
+            }
+        } else if (prevStatus !== round.status && round.status === 'answering') {
+            // Transition from selecting/voting to answering within same round (edge case)
+            const inp = document.getElementById('answerInput');
+            const sbtn = document.getElementById('answerSubmitBtn');
+            inp.style.display = ''; inp.disabled = false; inp.value = '';
+            sbtn.style.display = ''; sbtn.disabled = false;
+            document.getElementById('answerFeedback').innerHTML = '';
+            document.getElementById('answerSection').style.display = 'block';
         }
         if (data.question_duration) {
             questionDuration = data.question_duration;
@@ -389,13 +410,23 @@
         document.getElementById('roundBadge').textContent = '\u062C\u0648\u0644\u0629 ' + round.round_number;
         document.getElementById('questionText').textContent = round.question_text || '\u0627\u0644\u0633\u0624\u0627\u0644 \u063A\u064A\u0631 \u0645\u062A\u0648\u0641\u0631';
 
-        // Show word count hint
+        // Show answer type hint
         const wcHint = document.getElementById('wordCountHint');
-        if (round.correct_answer_word_count > 1) {
-            wcHint.textContent = '\u0627\u0644\u0625\u062C\u0627\u0628\u0629 \u062A\u062A\u0643\u0648\u0646 \u0645\u0646 ' + round.correct_answer_word_count + ' \u0643\u0644\u0645\u0627\u062A';
+        if (round.correct_answer_is_numeric) {
+            wcHint.textContent = '\u0627\u0644\u0625\u062C\u0627\u0628\u0629 \u0631\u0642\u0645';
             wcHint.style.display = 'block';
         } else {
-            wcHint.style.display = 'none';
+            const wc = round.correct_answer_word_count || 0;
+            if (wc >= 1) {
+                let label;
+                if (wc === 1) label = '\u0643\u0644\u0645\u0629 \u0648\u0627\u062D\u062F\u0629';
+                else if (wc === 2) label = '\u0643\u0644\u0645\u062A\u064A\u0646';
+                else label = wc + ' \u0643\u0644\u0645\u0627\u062A';
+                wcHint.textContent = '\u0627\u0644\u0625\u062C\u0627\u0628\u0629 \u062A\u062A\u0643\u0648\u0646 \u0645\u0646 ' + label;
+                wcHint.style.display = 'block';
+            } else {
+                wcHint.style.display = 'none';
+            }
         }
 
         const hasAnswered = !!round.has_answered;
@@ -409,15 +440,24 @@
             ansSection.style.display = 'none';
             document.getElementById('answerTimer').style.display = 'none';
             clearInterval(answerCountdown);
+            answerCountdown = null;
             if (hasAnswered) {
                 feedback.innerHTML = '<div class="alert alert-success border-0 rounded-3"><i class="fas fa-check me-2"></i>\u062A\u0645 \u0625\u0631\u0633\u0627\u0644 \u0625\u062C\u0627\u0628\u062A\u0643</div>';
             }
             waitingMsg.style.display = isSpectator ? 'none' : 'block';
+        } else if (round.answer_time_expired) {
+            ansSection.style.display = 'block';
+            input.disabled = true;
+            submitBtn.disabled = true;
+            document.getElementById('answerTimer').style.display = 'none';
+            waitingMsg.style.display = 'none';
         } else {
             ansSection.style.display = 'block';
             feedback.innerHTML = '';
             waitingMsg.style.display = 'none';
-            startAnswerTimer(questionDuration);
+            if (answerCountdown === null) {
+                startAnswerTimer(questionDuration);
+            }
             setTimeout(() => input.focus(), 100);
         }
 
@@ -429,6 +469,14 @@
         }
     }
 
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
     function showVotingPhase(round, data) {
         document.getElementById('selectingPhase').style.display = 'none';
         document.getElementById('questionPhase').style.display = 'none';
@@ -436,11 +484,18 @@
         document.getElementById('resultsPhase').style.display = 'none';
 
         const list = document.getElementById('answersList');
-        const answers = round.display_answers || [];
+        let answers = round.display_answers || [];
+
+        if (shuffledAnswerIds === null) {
+            shuffledAnswerIds = shuffleArray(answers.map(a => a.id));
+        }
+        const idOrder = new Map(shuffledAnswerIds.map((id, i) => [id, i]));
+        answers = [...answers].sort((a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0));
 
         if (round.has_voted || isSpectator) {
             document.getElementById('voteTimer').style.display = 'none';
             clearInterval(voteCountdown);
+            voteCountdown = null;
             list.innerHTML = '<div class="col-12"><div class="alert alert-success border-0 rounded-3"><i class="fas fa-check me-2"></i>' +
                 (isSpectator ? '\u0627\u0646\u062A\u0638\u0631 \u0646\u062A\u0627\u0626\u062C \u0627\u0644\u062A\u0635\u0648\u064A\u062A...' : '\u0644\u0642\u062F \u0635\u0648\u062A \u0628\u0627\u0644\u0641\u0639\u0644\u060C \u0627\u0646\u062A\u0638\u0631 \u0628\u0627\u0642\u064A \u0627\u0644\u0644\u0627\u0639\u0628\u064A\u0646...') +
                 '</div></div>';
@@ -450,11 +505,20 @@
         if (answers.length === 0) {
             document.getElementById('voteTimer').style.display = 'none';
             clearInterval(voteCountdown);
+            voteCountdown = null;
             list.innerHTML = '<div class="col-12"><div class="alert alert-warning border-0 rounded-3">\u0644\u0627 \u062A\u0648\u062C\u062F \u0625\u062C\u0627\u0628\u0627\u062A \u0644\u0644\u0639\u0631\u0636</div></div>';
             return;
         }
 
-        startVoteTimer(questionDuration);
+        if (round.vote_time_expired) {
+            document.getElementById('voteTimer').style.display = 'none';
+            list.innerHTML = '<div class="col-12"><div class="alert alert-danger border-0 rounded-3"><i class="fas fa-clock me-2"></i>\u0627\u0646\u062A\u0647\u0649 \u0627\u0644\u0648\u0642\u062A! \u0644\u0645 \u062A\u062A\u0645\u0643\u0646 \u0645\u0646 \u0627\u0644\u062A\u0635\u0648\u064A\u062A.</div></div>';
+            return;
+        }
+
+        if (voteCountdown === null) {
+            startVoteTimer(questionDuration);
+        }
 
         list.innerHTML = answers.map(a => {
             const countLabel = a.playercount > 1
@@ -586,135 +650,6 @@
                             </div>
                             <div class="small">\u062E\u064F\u062F\u0639\u0648\u0627 \u0628\u0647\u0627: ${r.voters.map(v => '<span class="badge bg-dark me-1">' + esc(v) + '</span>').join('')}</div>
                         ` : '<div class="text-muted small"><i class="fas fa-ban me-1"></i>\u0644\u0645 \u064A\u062E\u062A\u0631\u0647\u0627 \u0623\u062D\u062F</div>'}
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        const nextBtn = document.getElementById('nextRoundBtn');
-        const finalMsg = document.getElementById('finalRoundMsg');
-
-        if (data.current_round >= data.total_rounds) {
-            finalMsg.style.display = 'block';
-            nextBtn.style.display = 'none';
-            playSound('finish');
-            setTimeout(() => {
-                window.location.href = '/bluff/' + code + '/results';
-            }, 3000);
-        } else if (data.is_creator && !isSpectator) {
-            if (resultsPhaseStart === null) {
-                resultsPhaseStart = Date.now();
-            }
-            const elapsed = (Date.now() - resultsPhaseStart) / 1000;
-            const remaining = Math.max(0, 8 - Math.floor(elapsed));
-
-            nextBtn.style.display = 'inline-block';
-            nextBtn.innerHTML = '<i class="fas fa-arrow-left me-2"></i>\u0627\u0644\u062A\u0627\u0644\u064A (' + remaining + ')';
-            nextBtn.disabled = false;
-
-            if (remaining <= 0 && !nextBtn.dataset.advancing) {
-                nextBtn.dataset.advancing = '1';
-                nextBtn.disabled = true;
-                nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>\u062C\u0627\u0631\u064A...';
-                fetch('/bluff/' + code + '/advance', {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-                })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.redirect) { window.location.href = d.redirect; return; }
-                    polling = false;
-                    poll();
-                })
-                .catch(() => {
-                    nextBtn.disabled = false;
-                    nextBtn.dataset.advancing = '';
-                    nextBtn.innerHTML = '<i class="fas fa-arrow-left me-2"></i>\u0627\u0644\u062A\u0627\u0644\u064A';
-                });
-                return;
-            }
-
-            nextBtn.onclick = function() {
-                this.dataset.advancing = '1';
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>\u062C\u0627\u0631\u064A...';
-                fetch('/bluff/' + code + '/advance', {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-                })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.redirect) { window.location.href = d.redirect; return; }
-                    polling = false;
-                    poll();
-                })
-                .catch(() => {
-                    this.disabled = false;
-                    this.dataset.advancing = '';
-                    this.innerHTML = '<i class="fas fa-arrow-left me-2"></i>\u0627\u0644\u062A\u0627\u0644\u064A';
-                });
-            };
-        } else {
-            if (resultsPhaseStart === null) {
-                resultsPhaseStart = Date.now();
-            }
-            const elapsed = (Date.now() - resultsPhaseStart) / 1000;
-
-            if (elapsed > 20 && !nextBtn.dataset.advancing) {
-                nextBtn.dataset.advancing = '1';
-                fetch('/bluff/' + code + '/advance', {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-                })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.redirect) { window.location.href = d.redirect; return; }
-                    polling = false;
-                    poll();
-                })
-                .catch(() => { nextBtn.dataset.advancing = ''; });
-                return;
-            }
-
-            nextBtn.style.display = 'none';
-            finalMsg.innerHTML = '<i class="fas fa-clock me-2"></i>\u0628\u0627\u0646\u062A\u0638\u0627\u0631 \u0627\u0644\u062A\u0642\u062F\u0645 \u0644\u0644\u062C\u0648\u0644\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629...';
-            finalMsg.className = 'alert alert-info border-0 rounded-3';
-            finalMsg.style.display = 'block';
-        }
-    }
-
-                if (r.is_real_fake) {
-                    return `<div class="col-12 mb-3">
-                        <div class="card-custom p-3 text-center" style="border:2px solid var(--success);">
-                            <div class="fw-bold mb-1" style="font-size:1.2rem;">${esc(r.answer_text)}</div>
-                            <div class="mb-2">${label}</div>
-                            ${votersHtml ? '<div class="small text-muted mt-2"><strong>\u0627\u062E\u062A\u0627\u0631\u0648\u0647\u0627:</strong> ' + votersHtml + '</div>' : ''}
-                            <div class="small text-warning fw-bold mt-1">${r.vote_count} \u0635\u0648\u062A \u00d7 2 \u0646\u0642\u0637\u0629 = ${r.vote_count * 2} \u0646\u0642\u0637\u0629 \u0644\u0644\u0645\u0635\u0648\u062A\u064A\u0646</div>
-                        </div>
-                    </div>`;
-                }
-
-                const authors = r.authors && r.authors.length > 0
-                    ? r.authors.map(v => esc(v)).join('، ')
-                    : esc(r.author_name || '—');
-
-                const authorCountBadge = r.author_count > 1
-                    ? ' <span class="badge bg-warning text-dark">' + r.author_count + ' \u0643\u0627\u062A\u0628</span>'
-                    : '';
-
-                const pointsLine = r.vote_count > 0
-                    ? r.vote_count + ' \u0635\u0648\u062A \u00D7 ' + r.author_count + ' \u0643\u0627\u062A\u0628 = ' + (r.vote_count * r.author_count) + ' \u0646\u0642\u0637\u0629 \u0644\u0644\u0645\u062C\u0645\u0648\u0639\u0629'
-                    : '';
-
-                return `<div class="col-md-6 mb-3">
-                    <div class="card-custom p-3 text-center h-100">
-                        <div class="fw-bold mb-1" style="font-size:1.1rem;">${esc(r.answer_text)}</div>
-                        <div class="mb-1">${label}${authorCountBadge}</div>
-                        <div class="small text-muted">${authors}</div>
-                        ${votersHtml
-                            ? '<div class="small mt-2"><strong>\u062E\u064F\u062F\u0639\u0648\u0627 \u0628\u0647\u0627:</strong> ' + votersHtml + '</div>' +
-                              (pointsLine ? '<div class="small text-warning fw-bold mt-1">' + pointsLine + '</div>' : '')
-                            : '<div class="small text-muted mt-2">\u0644\u0645 \u064A\u062E\u062A\u0631\u0647\u0627 \u0623\u062D\u062F</div>'}
                     </div>
                 </div>`;
             }).join('');

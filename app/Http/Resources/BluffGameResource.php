@@ -21,7 +21,7 @@ class BluffGameResource extends JsonResource
                 return $this->players->map(fn($p) => [
                     'id' => $p->id,
                     'user_id' => $p->user_id,
-                    'name' => $p->user->name,
+                    'name' => $p->display_name,
                     'avatar' => $p->user->avatar_url,
                     'total_score' => (int) $p->total_score,
                 ]);

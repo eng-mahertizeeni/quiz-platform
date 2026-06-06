@@ -67,6 +67,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/{code}/lobby', [BluffController::class, 'lobby'])->name('lobby');
         Route::get('/{code}/lobby-data', [BluffController::class, 'lobbyData'])->name('lobby.data');
         Route::post('/{code}/start', [BluffController::class, 'start'])->name('start');
+        Route::post('/{code}/display-name', [BluffController::class, 'updateDisplayName'])->name('display.name');
         Route::get('/{code}/play', [BluffController::class, 'play'])->name('play');
         Route::get('/{code}/state', [BluffController::class, 'getState'])->name('state');
         Route::post('/{code}/advance', [BluffController::class, 'advanceRound'])->name('advance');

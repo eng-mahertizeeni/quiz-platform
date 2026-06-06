@@ -10,6 +10,12 @@ class BluffRound extends Model
 
     protected $fillable = [
         'bluff_game_id', 'bluff_question_id', 'selected_by_player_id', 'category_id', 'round_number', 'status',
+        'answering_started_at', 'voting_started_at',
+    ];
+
+    protected $casts = [
+        'answering_started_at' => 'datetime',
+        'voting_started_at' => 'datetime',
     ];
 
     public function game()

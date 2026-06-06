@@ -14,7 +14,17 @@ class ArabicHelper
             '/ـ/u'      => '',
             '/\s+/u'    => ' ',
         ];
-        return preg_replace(array_keys($map), array_values($map), $text);
+        $text = preg_replace(array_keys($map), array_values($map), $text);
+        // Normalize Arabic-Indic digits to Western digits
+        $arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        $westernDigits = range(0, 9);
+        $text = str_replace($arabicDigits, $westernDigits, $text);
+        return $text;
+    }
+
+    public static function isNumeric(string $text): bool
+    {
+        return preg_match('/^[0-9]+(\.[0-9]+)?$/', $text) === 1;
     }
 
     public static function matches(string $input, string $correct): bool
@@ -24,15 +34,13 @@ class ArabicHelper
 
         if ($a === $b) return true;
 
-        $byteDist = levenshtein($a, $b);
-        $byteLen  = strlen($b);
+        // For purely numeric answers: only exact match allowed
+        if (self::isNumeric($b)) {
+            return $a === $b;
+        }
 
-        if ($byteDist <= 2) return true;
-        if ($byteDist <= max(2, intdiv($byteLen, 6))) return true;
-
-        similar_text($a, $b, $pct);
-        if ($pct >= 85) return true;
-
-        return false;
+        // For text answers: allow up to 1 character difference
+        $dist = levenshtein($a, $b);
+        return $dist <= 1;
     }
 }
