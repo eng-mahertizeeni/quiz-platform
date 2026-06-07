@@ -16,7 +16,9 @@ class PracticeController extends Controller
         $categories = Category::active()
             ->withCount(['questions' => fn($q) => $q->active()])
             ->orderBy('sort_order')
-            ->get();
+            ->get()
+            ->filter(fn($c) => $c->questions_count > 0)
+            ->values();
 
         $answers = UserQuestionAnswer::where('user_id', $user->id)
             ->whereHas('question', fn($q) => $q->active())

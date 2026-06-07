@@ -165,11 +165,23 @@
         }
     }
 
-    function startAnswerTimer(duration) {
+    function startAnswerTimer(remaining) {
         clearInterval(answerCountdown);
         const el = document.getElementById('answerTimerValue');
         const container = document.getElementById('answerTimer');
-        let remaining = duration;
+        if (remaining <= 0) {
+            container.style.display = 'none';
+            const btn = document.getElementById('answerSubmitBtn');
+            const input = document.getElementById('answerInput');
+            if (!btn.disabled && input.value.trim()) {
+                submitAnswer();
+            } else if (!btn.disabled) {
+                btn.disabled = true;
+                document.getElementById('answerFeedback').innerHTML =
+                    '<div class="alert alert-danger border-0 rounded-3 py-2"><i class="fas fa-clock me-2"></i>انتهى الوقت!</div>';
+            }
+            return;
+        }
         el.textContent = remaining;
         container.style.display = 'inline-block';
         container.className = 'badge bg-danger fs-6';
@@ -193,11 +205,20 @@
         }, 1000);
     }
 
-    function startVoteTimer(duration) {
+    function startVoteTimer(remaining) {
         clearInterval(voteCountdown);
         const el = document.getElementById('voteTimerValue');
         const container = document.getElementById('voteTimer');
-        let remaining = duration;
+        if (remaining <= 0) {
+            container.style.display = 'none';
+            const btns = document.querySelectorAll('.vote-btn');
+            if (btns.length > 0 && !btns[0].disabled) {
+                btns.forEach(b => b.disabled = true);
+                document.getElementById('voteFeedback').innerHTML =
+                    '<div class="alert alert-danger border-0 rounded-3"><i class="fas fa-clock me-2"></i>انتهى الوقت! لم تتمكن من التصويت.</div>';
+            }
+            return;
+        }
         el.textContent = remaining;
         container.style.display = 'inline-block';
         container.className = 'badge bg-danger fs-6';
@@ -239,9 +260,14 @@
     }
 
     let polling = false;
+    let lastPollTime = 0;
     function poll() {
-        if (polling) return;
+        if (polling) {
+            if (Date.now() - lastPollTime > 10000) { polling = false; }
+            else { return; }
+        }
         polling = true;
+        lastPollTime = Date.now();
         getState().then(data => {
             document.getElementById('loadingIndicator').style.display = 'none';
             renderState(data);
@@ -249,6 +275,10 @@
             document.getElementById('loadingIndicator').style.display = 'none';
         }).finally(() => { polling = false; });
     }
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) { polling = false; poll(); }
+    });
 
     function renderState(data) {
         if (data.status === 'finished') {
@@ -456,7 +486,9 @@
             feedback.innerHTML = '';
             waitingMsg.style.display = 'none';
             if (answerCountdown === null) {
-                startAnswerTimer(questionDuration);
+                const serverRemaining = (typeof round.answer_remaining !== 'undefined')
+                    ? Math.max(0, Math.round(round.answer_remaining)) : questionDuration;
+                startAnswerTimer(serverRemaining);
             }
             setTimeout(() => input.focus(), 100);
         }
@@ -517,7 +549,9 @@
         }
 
         if (voteCountdown === null) {
-            startVoteTimer(questionDuration);
+            const serverRemaining = (typeof round.vote_remaining !== 'undefined')
+                ? Math.max(0, Math.round(round.vote_remaining)) : questionDuration;
+            startVoteTimer(serverRemaining);
         }
 
         list.innerHTML = answers.map(a => {

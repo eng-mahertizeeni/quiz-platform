@@ -239,11 +239,17 @@ class BluffService
 
                 $answerTimeExpired = false;
                 $voteTimeExpired = false;
+                $answerRemaining = 0;
+                $voteRemaining = 0;
 
                 if ($currentRound->status === 'answering' && $currentRound->answering_started_at) {
-                    $answerTimeExpired = $currentRound->answering_started_at->copy()->addSeconds($game->question_duration)->isPast();
+                    $answerEnd = $currentRound->answering_started_at->copy()->addSeconds($game->question_duration);
+                    $answerTimeExpired = $answerEnd->isPast();
+                    $answerRemaining = $answerTimeExpired ? 0 : (int) ceil(max(0, now()->diffInSeconds($answerEnd, false)));
                 } elseif ($currentRound->status === 'voting' && $currentRound->voting_started_at) {
-                    $voteTimeExpired = $currentRound->voting_started_at->copy()->addSeconds($game->question_duration)->isPast();
+                    $voteEnd = $currentRound->voting_started_at->copy()->addSeconds($game->question_duration);
+                    $voteTimeExpired = $voteEnd->isPast();
+                    $voteRemaining = $voteTimeExpired ? 0 : (int) ceil(max(0, now()->diffInSeconds($voteEnd, false)));
                 }
 
                 $roundData = [
@@ -259,6 +265,8 @@ class BluffService
                     'waiting_for_answers' => $playerIds->reject(fn($id) => $answeredIds->contains($id))->count(),
                     'answer_time_expired' => $answerTimeExpired,
                     'vote_time_expired' => $voteTimeExpired,
+                    'answer_remaining' => $answerRemaining,
+                    'vote_remaining' => $voteRemaining,
                 ];
 
                 $playerAnswer = $allAnswers->firstWhere('bluff_player_id', $authPlayer?->id);
