@@ -47,6 +47,15 @@ class CategorySeeder extends Seeder
             ['name' => 'ألغاز وتفكير منطقي', 'slug' => 'puzzles-logic', 'icon' => 'puzzle-piece', 'color' => '#F59E0B', 'is_featured' => true, 'sort_order' => 0],
             ['name' => 'استكشاف ومغامرة', 'slug' => 'exploration', 'icon' => 'compass', 'color' => '#92400E', 'is_featured' => true, 'sort_order' => 0],
             ['name' => 'ثقافة رقمية', 'slug' => 'digital-culture', 'icon' => 'hashtag', 'color' => '#3B82F6', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'جوائز وألقاب عالمية', 'slug' => 'جوائز-وألقاب-عالمية', 'icon' => 'trophy', 'color' => '#F59E0B', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'معالم وآثار خالدة', 'slug' => 'معالم-وآثار-خالدة', 'icon' => 'landmark', 'color' => '#92400E', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'اختراعات غيرت مسار البشرية', 'slug' => 'اختراعات-غيرت-مسار-البشرية', 'icon' => 'lightbulb', 'color' => '#2563EB', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'عجائب الدنيا والطبيعة', 'slug' => 'عجائب-الدنيا-والطبيعة', 'icon' => 'globe', 'color' => '#10B981', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'موسيقى وفنون', 'slug' => 'موسيقى-وفنون', 'icon' => 'music', 'color' => '#EC4899', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'رياضات مائية وجبلية', 'slug' => 'رياضات-مائية-وجبلية', 'icon' => 'water', 'color' => '#06B6D4', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'الحضارة الإسلامية', 'slug' => 'الحضارة-الإسلامية', 'icon' => 'mosque', 'color' => '#059669', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'أعياد ومناسبات', 'slug' => 'أعياد-ومناسبات', 'icon' => 'calendar-alt', 'color' => '#DC2626', 'is_featured' => true, 'sort_order' => 0],
+            ['name' => 'أساطير وحكايات شعبية', 'slug' => 'أساطير-وحكايات-شعبية', 'icon' => 'dragon', 'color' => '#7C3AED', 'is_featured' => true, 'sort_order' => 0],
         ];
 
         foreach ($categories as $cat) {

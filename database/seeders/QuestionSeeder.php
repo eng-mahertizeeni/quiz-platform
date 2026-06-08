@@ -35,6 +35,21 @@ class QuestionSeeder extends Seeder
             require __DIR__ . '/questions/nature-animals.php',
             require __DIR__ . '/questions/islamic-knowledge.php',
             require __DIR__ . '/questions/food-cuisine.php',
+            require __DIR__ . '/questions/greek-mythology.php',
+            require __DIR__ . '/questions/philosophy.php',
+            require __DIR__ . '/questions/artificial-intelligence.php',
+            require __DIR__ . '/questions/psychology.php',
+            require __DIR__ . '/questions/natural-phenomena.php',
+            require __DIR__ . '/questions/world-languages.php',
+            require __DIR__ . '/questions/harry-potter.php',
+            require __DIR__ . '/questions/marvel.php',
+            require __DIR__ . '/questions/netflix-series.php',
+            require __DIR__ . '/questions/korean-culture.php',
+            require __DIR__ . '/questions/esports.php',
+            require __DIR__ . '/questions/energy-environment.php',
+            require __DIR__ . '/questions/puzzles-logic.php',
+            require __DIR__ . '/questions/exploration.php',
+            require __DIR__ . '/questions/digital-culture.php',
         );
 
         foreach ($questions as $q) {
