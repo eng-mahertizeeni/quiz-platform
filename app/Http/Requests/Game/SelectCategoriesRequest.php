@@ -23,18 +23,7 @@ class SelectCategoriesRequest extends FormRequest
 
     public function withValidator($validator): void
     {
-        $validator->after(function ($validator) {
-            $categoryIds = $this->input('category_ids', []);
-            foreach ($categoryIds as $id) {
-                $category = Category::find($id);
-                if ($category && !$category->hasEnoughQuestions()) {
-                    $validator->errors()->add(
-                        'category_ids',
-                        "الفئة \"{$category->name}\" لا تحتوي على أسئلة كافية"
-                    );
-                }
-            }
-        });
+        // removed hasEnoughQuestions check - all categories are selectable
     }
 
     public function messages(): array
