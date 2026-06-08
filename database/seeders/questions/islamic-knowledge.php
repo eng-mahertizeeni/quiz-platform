@@ -1,0 +1,21 @@
+<?php
+return [
+    ['category' => 'islamic-knowledge', 'difficulty' => 'medium', 'question' => 'كم عدد أركان الإسلام؟', 'a' => '3', 'b' => '5', 'c' => '6', 'd' => '7', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'medium', 'question' => 'كم عدد أسماء الله الحسنى؟', 'a' => '66', 'b' => '99', 'c' => '100', 'd' => '77', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'medium', 'question' => 'في أي سنة كانت غزوة بدر؟', 'a' => '1 هـ', 'b' => '2 هـ', 'c' => '3 هـ', 'd' => '4 هـ', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'medium', 'question' => 'من هو أول الخلفاء الراشدين؟', 'a' => 'عمر بن الخطاب', 'b' => 'أبو بكر الصديق', 'c' => 'عثمان بن عفان', 'd' => 'علي بن أبي طالب', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'hard', 'question' => 'كم عدد سور القرآن الكريم؟', 'a' => '60', 'b' => '114', 'c' => '120', 'd' => '99', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'hard', 'question' => 'من هو الصحابي الملقب بـ "سيف الله المسلول"؟', 'a' => 'أبو عبيدة بن الجراح', 'b' => 'خالد بن الوليد', 'c' => 'عمرو بن العاص', 'd' => 'سعد بن أبي وقاص', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'hard', 'question' => 'في أي سنة كانت غزوة الخندق؟', 'a' => '3 هـ', 'b' => '5 هـ', 'c' => '7 هـ', 'd' => '4 هـ', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'hard', 'question' => 'من هو آخر الخلفاء الراشدين؟', 'a' => 'عمر بن الخطاب', 'b' => 'علي بن أبي طالب', 'c' => 'عثمان بن عفان', 'd' => 'الحسن بن علي', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'very_hard', 'question' => 'كم عدد آيات سورة البقرة؟', 'a' => '256', 'b' => '286', 'c' => '276', 'd' => '296', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'very_hard', 'question' => 'من هو النبي الذي صام أول صيام في الإسلام؟', 'a' => 'نوح عليه السلام', 'b' => 'نوح وآدم عليهما السلام', 'c' => 'إبراهيم عليه السلام', 'd' => 'موسى عليه السلام', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'very_hard', 'question' => 'ما هي السورة التي تسمى "قلب القرآن"؟', 'a' => 'الإخلاص', 'b' => 'يس', 'c' => 'الفاتحة', 'd' => 'الملك', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'very_hard', 'question' => 'من هو الصحابي الذي دفن وحده في غار؟', 'a' => 'عمر بن الخطاب', 'b' => 'أبو بكر الصديق', 'c' => 'أبو عبيدة بن الجراح', 'd' => 'الزبير بن العوام', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'medium', 'question' => 'ما هي السورة التي تبدأ بـ "الم"؟', 'a' => 'البقرة', 'b' => 'آل عمران', 'c' => 'الأعراف', 'd' => 'يونس', 'correct' => 'a'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'medium', 'question' => 'من هو النبي الذي ألقاه قومه في النار؟', 'a' => 'موسى عليه السلام', 'b' => 'إبراهيم عليه السلام', 'c' => 'نوح عليه السلام', 'd' => 'عيسى عليه السلام', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'hard', 'question' => 'ما هي السورة التي تعدل ثلث القرآن؟', 'a' => 'الفاتحة', 'b' => 'الإخلاص', 'c' => 'الكوثر', 'd' => 'النصر', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'hard', 'question' => 'من هو الصحابي الملقب بـ "الفياض"؟', 'a' => 'طلحة بن عبيد الله', 'b' => 'الزبير بن العوام', 'c' => 'سعد بن أبي وقاص', 'd' => 'عبد الرحمن بن عوف', 'correct' => 'd'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'very_hard', 'question' => 'كم عدد السجدات في القرآن الكريم؟', 'a' => '14', 'b' => '15', 'c' => '13', 'd' => '17', 'correct' => 'b'],
+    ['category' => 'islamic-knowledge', 'difficulty' => 'very_hard', 'question' => 'ما هي السورة التي نزلت كاملة؟', 'a' => 'الفاتحة', 'b' => 'المدثر', 'c' => 'الحجرات', 'd' => 'الأحزاب', 'correct' => 'b'],
+];

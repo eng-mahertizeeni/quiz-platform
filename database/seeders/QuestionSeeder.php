@@ -31,6 +31,10 @@ class QuestionSeeder extends Seeder
             require __DIR__ . '/questions/historical-figures.php',
             require __DIR__ . '/questions/quotes.php',
             require __DIR__ . '/questions/capitals.php',
+            require __DIR__ . '/questions/literature-poetry.php',
+            require __DIR__ . '/questions/nature-animals.php',
+            require __DIR__ . '/questions/islamic-knowledge.php',
+            require __DIR__ . '/questions/food-cuisine.php',
         );
 
         foreach ($questions as $q) {
