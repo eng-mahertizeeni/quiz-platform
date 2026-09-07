@@ -144,14 +144,12 @@
     let questionDuration = 30;
     let shuffledAnswerIds = null;
 
-    // XSS escape
     function esc(str) {
         const d = document.createElement('div');
         d.textContent = str;
         return d.innerHTML;
     }
 
-    // Sound
     function playSound(name) {
         if (!soundEnabled) return;
         const sounds = {
@@ -298,7 +296,7 @@
             resultsPhaseStart = null;
             shuffledAnswerIds = null;
             stopTimers();
-            // Reset answer input for a new round's answering phase
+            
             if (round.status === 'answering') {
                 const inp = document.getElementById('answerInput');
                 const sbtn = document.getElementById('answerSubmitBtn');
@@ -308,7 +306,7 @@
                 document.getElementById('answerSection').style.display = 'block';
             }
         } else if (prevStatus !== round.status && round.status === 'answering') {
-            // Transition from selecting/voting to answering within same round (edge case)
+            
             const inp = document.getElementById('answerInput');
             const sbtn = document.getElementById('answerSubmitBtn');
             inp.style.display = ''; inp.disabled = false; inp.value = '';
@@ -440,7 +438,6 @@
         document.getElementById('roundBadge').textContent = '\u062C\u0648\u0644\u0629 ' + round.round_number;
         document.getElementById('questionText').textContent = round.question_text || '\u0627\u0644\u0633\u0624\u0627\u0644 \u063A\u064A\u0631 \u0645\u062A\u0648\u0641\u0631';
 
-        // Show answer type hint
         const wcHint = document.getElementById('wordCountHint');
         if (round.correct_answer_is_numeric) {
             wcHint.textContent = '\u0627\u0644\u0625\u062C\u0627\u0628\u0629 \u0631\u0642\u0645';
@@ -617,7 +614,7 @@
         if (results.length === 0) {
             list.innerHTML = '<div class="col-12"><p class="text-muted">\u0644\u0627 \u062A\u0648\u062C\u062F \u0646\u062A\u0627\u0626\u062C</p></div>';
         } else {
-            // Calculate total points per player for this round
+            
             const pointsMap = {};
             results.forEach(r => {
                 if (r.is_real_fake) {

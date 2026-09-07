@@ -34,21 +34,18 @@ class GameTest extends TestCase
         }
     }
 
-    #[Test]
     public function create_game_page_is_accessible()
     {
         $response = $this->actingAs($this->user)->get(route('game.create'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function guests_cannot_access_create_game()
     {
         $response = $this->get(route('game.create'));
         $response->assertRedirect(route('login', absolute: false));
     }
 
-    #[Test]
     public function game_can_be_created()
     {
         $response = $this->actingAs($this->user)->post(route('game.store'), [
@@ -62,7 +59,6 @@ class GameTest extends TestCase
         $response->assertRedirect(route('game.categories', $session->code));
     }
 
-    #[Test]
     public function categories_page_shows_games()
     {
         $session = $this->createGameSession();
@@ -71,7 +67,6 @@ class GameTest extends TestCase
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function categories_can_be_attached_to_game()
     {
         $session = $this->createGameSession();
@@ -97,7 +92,6 @@ class GameTest extends TestCase
         $this->assertCount(6, $session->fresh()->categories);
     }
 
-    #[Test]
     public function lobby_page_is_accessible()
     {
         $session = $this->createGameSession();
@@ -106,7 +100,6 @@ class GameTest extends TestCase
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function game_can_be_started()
     {
         $session = $this->createGameSession();
@@ -133,7 +126,6 @@ class GameTest extends TestCase
         $this->assertEquals('active', $session->fresh()->status);
     }
 
-    #[Test]
     public function board_page_redirects_to_lobby_if_waiting()
     {
         $session = $this->createGameSession();
@@ -142,14 +134,12 @@ class GameTest extends TestCase
         $response->assertRedirect(route('game.lobby', $session->code));
     }
 
-    #[Test]
     public function leaderboard_page_is_accessible()
     {
         $response = $this->get(route('leaderboard'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function statistics_page_is_accessible()
     {
         $response = $this->get(route('statistics'));

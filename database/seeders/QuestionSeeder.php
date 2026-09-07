@@ -87,15 +87,30 @@ class QuestionSeeder extends Seeder
             require __DIR__ . '/questions/real-madrid.php',
             require __DIR__ . '/questions/barcelona.php',
             require __DIR__ . '/questions/historical-leaders.php',
+            require __DIR__ . '/questions/dexter.php',
+            require __DIR__ . '/questions/the-pit.php',
+            require __DIR__ . '/questions/vikings.php',
+            require __DIR__ . '/questions/breaking-bad.php',
+            require __DIR__ . '/questions/stranger-things.php',
+            require __DIR__ . '/questions/prison-break.php',
+            require __DIR__ . '/questions/la-casa-de-papel.php',
         );
+
+        $populatedCategoryIds = Question::whereIn('category_id', $categories->pluck('id'))
+            ->distinct()
+            ->pluck('category_id')
+            ->flip();
 
         foreach ($questions as $q) {
             $category = $categories->get($q['category']);
             if (!$category) continue;
 
+            if (isset($populatedCategoryIds[$category->id])) continue;
+
             Question::create([
                 'category_id' => $category->id,
                 'question_text' => $q['question'],
+                'question_text_ar' => $q['question'],
                 'answer_a' => $q['a'],
                 'answer_b' => $q['b'],
                 'answer_c' => $q['c'],

@@ -10,7 +10,7 @@ use Tests\TestCase;
 class UserTest extends TestCase
 {
     use DatabaseMigrations;
-    #[Test]
+    
     public function it_checks_if_user_is_admin()
     {
         $admin = User::factory()->create(['role' => 'admin']);
@@ -20,7 +20,6 @@ class UserTest extends TestCase
         $this->assertFalse($user->isAdmin());
     }
 
-    #[Test]
     public function it_checks_if_user_is_user()
     {
         $user = User::factory()->create(['role' => 'user']);
@@ -30,7 +29,6 @@ class UserTest extends TestCase
         $this->assertFalse($admin->isUser());
     }
 
-    #[Test]
     public function it_calculates_win_rate()
     {
         $user = User::factory()->create(['games_played' => 10, 'games_won' => 7]);
@@ -40,7 +38,6 @@ class UserTest extends TestCase
         $this->assertEquals(0, $user2->win_rate);
     }
 
-    #[Test]
     public function it_generates_avatar_url()
     {
         $user = User::factory()->create(['name' => 'Test User', 'avatar' => null]);

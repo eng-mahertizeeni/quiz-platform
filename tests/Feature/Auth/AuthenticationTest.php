@@ -10,21 +10,19 @@ use PHPUnit\Framework\Attributes\Test;
 class AuthenticationTest extends TestCase
 {
     use DatabaseMigrations;
-    #[Test]
+    
     public function login_screen_can_be_rendered()
     {
         $response = $this->get('/login');
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function register_screen_can_be_rendered()
     {
         $response = $this->get('/register');
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function users_can_authenticate()
     {
         $user = User::factory()->create();
@@ -38,7 +36,6 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
-    #[Test]
     public function admin_redirects_to_admin_dashboard()
     {
         $admin = User::factory()->create(['role' => 'admin']);
@@ -52,7 +49,6 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('admin.dashboard', absolute: false));
     }
 
-    #[Test]
     public function users_cannot_authenticate_with_invalid_password()
     {
         $user = User::factory()->create();
@@ -65,7 +61,6 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    #[Test]
     public function users_can_register()
     {
         $response = $this->post('/register', [
@@ -80,7 +75,6 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
     }
 
-    #[Test]
     public function users_can_logout()
     {
         $user = User::factory()->create();
@@ -91,7 +85,6 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect('/');
     }
 
-    #[Test]
     public function inactive_users_cannot_login()
     {
         $user = User::factory()->create(['is_active' => false]);

@@ -15,7 +15,7 @@ class ArabicHelper
             '/\s+/u'    => ' ',
         ];
         $text = preg_replace(array_keys($map), array_values($map), $text);
-        // Normalize Arabic-Indic digits to Western digits
+        
         $arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
         $westernDigits = range(0, 9);
         $text = str_replace($arabicDigits, $westernDigits, $text);
@@ -34,12 +34,10 @@ class ArabicHelper
 
         if ($a === $b) return true;
 
-        // For purely numeric answers: only exact match allowed
         if (self::isNumeric($b)) {
             return $a === $b;
         }
 
-        // For text answers: allow up to 1 character difference
         $dist = levenshtein($a, $b);
         return $dist <= 1;
     }

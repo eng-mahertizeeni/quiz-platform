@@ -16,27 +16,45 @@
 
     <style>
         :root {
-            --primary: #F59E0B;
-            --primary-dark: #D97706;
-            --bg-dark: #0F172A;
-            --bg-card: #1E293B;
-            --bg-card-hover: #263548;
-            --text-primary: #F1F5F9;
-            --text-muted: #94A3B8;
-            --border: #334155;
-            --success: #10B981;
-            --danger: #EF4444;
-            --info: #3B82F6;
-            --warning: #F59E0B;
+            --primary: 
+
+            --primary-dark: 
+
+            --bg-dark: 
+
+            --bg-card: 
+
+            --bg-card-hover: 
+
+            --text-primary: 
+
+            --text-muted: 
+
+            --border: 
+
+            --success: 
+
+            --danger: 
+
+            --info: 
+
+            --warning: 
+
         }
 
         [data-theme="light"] {
-            --bg-dark: #F8FAFC;
-            --bg-card: #FFFFFF;
-            --bg-card-hover: #F1F5F9;
-            --text-primary: #0F172A;
-            --text-muted: #64748B;
-            --border: #E2E8F0;
+            --bg-dark: 
+
+            --bg-card: 
+
+            --bg-card-hover: 
+
+            --text-primary: 
+
+            --text-muted: 
+
+            --border: 
+
         }
 
         * { box-sizing: border-box; }
@@ -75,7 +93,8 @@
         .btn-primary-custom {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border: none;
-            color: #0F172A;
+            color: 
+
             font-weight: 700;
             border-radius: 10px;
             padding: 10px 24px;
@@ -85,12 +104,15 @@
         .btn-primary-custom:hover {
             transform: translateY(-1px);
             box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
-            color: #0F172A;
+            color: 
+
         }
 
-        .badge-points-250 { background: #F59E0B; color: #000; }
-        .badge-points-500 { background: #EF4444; color: #fff; }
-        .badge-points-750 { background: #7C3AED; color: #fff; }
+        .badge-points-250 { background: 
+
+        .badge-points-500 { background: 
+
+        .badge-points-750 { background: 
 
         .toast-container { z-index: 9999; }
 
@@ -322,7 +344,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Theme Toggle
+        
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon   = document.getElementById('themeIcon');
         const html        = document.documentElement;
@@ -339,7 +361,6 @@
             themeIcon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         });
 
-        // Auto-dismiss toasts
         document.querySelectorAll('.toast').forEach(t => {
             setTimeout(() => {
                 const bsToast = bootstrap.Toast.getOrCreateInstance(t);

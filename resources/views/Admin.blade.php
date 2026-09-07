@@ -13,13 +13,20 @@
     <style>
         :root {
             --sidebar-w: 260px;
-            --bg-dark: #0B1120;
-            --bg-card: #151F32;
-            --bg-sidebar: #0F172A;
-            --border: #1E2D45;
-            --text-primary: #E2E8F0;
-            --text-muted: #64748B;
-            --primary: #F59E0B;
+            --bg-dark: 
+
+            --bg-card: 
+
+            --bg-sidebar: 
+
+            --border: 
+
+            --text-primary: 
+
+            --text-muted: 
+
+            --primary: 
+
         }
 
         body {
@@ -112,14 +119,16 @@
         }
 
         .form-control, .form-select {
-            background: #0B1120;
+            background: 
+
             border: 1px solid var(--border);
             color: var(--text-primary);
             border-radius: 10px;
         }
 
         .form-control:focus, .form-select:focus {
-            background: #0B1120;
+            background: 
+
             color: var(--text-primary);
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);

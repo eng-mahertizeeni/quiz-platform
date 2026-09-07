@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class KuraiyatService
 {
-    private const FOOTBALL_CATEGORY_ID = 1;
-
     public function createGame(int $userId): KuraiyatGame
     {
         return DB::transaction(function () use ($userId) {
@@ -34,8 +32,8 @@ class KuraiyatService
     public function startGame(KuraiyatGame $game): void
     {
         DB::transaction(function () use ($game) {
-            $questions = Question::where('category_id', self::FOOTBALL_CATEGORY_ID)
-                ->where('status', 'active')
+            
+            $questions = Question::where('status', 'active')
                 ->where('difficulty', 'very_hard')
                 ->whereNotNull('hint_1')
                 ->whereNotNull('hint_2')

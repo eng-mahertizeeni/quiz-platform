@@ -71,7 +71,6 @@ class BluffService
                 throw new \RuntimeException('لم يتم اختيار أي فقرة');
             }
 
-            // Verify each selected category has at least one question
             foreach ($game->selected_categories as $catId) {
                 $count = BluffQuestion::where('category_id', $catId)->count();
                 if ($count === 0) {
@@ -479,10 +478,8 @@ class BluffService
     {
         $round->load('answers.votes');
 
-        // Start with ALL game players to prevent any player from being missed
         $playerIds = $game->players()->pluck('bluff_players.id');
 
-        // Also include any voters or answer authors not already in the game players
         foreach ($round->answers as $answer) {
             foreach ($answer->votes as $vote) {
                 $playerIds->push($vote->bluff_voter_id);
@@ -497,7 +494,6 @@ class BluffService
         $realAnswer = $round->answers->firstWhere('is_real_fake', true);
         $fakeAnswers = $round->answers->where('is_real_fake', false);
 
-        // Correct answer detection: voter gets +2 regardless which copy they voted on
         if ($realAnswer) {
             $realAnswerText = $realAnswer->answer_text;
             foreach ($round->answers as $answer) {
@@ -512,7 +508,6 @@ class BluffService
             }
         }
 
-        // Fake answers: group by text, each vote on a text gives 1 point to EACH author of that text
         $groupedByText = $fakeAnswers->groupBy(fn($a) => $a->answer_text);
         foreach ($groupedByText as $text => $group) {
             $totalVotes = $group->sum(fn($a) => $a->votes->count());

@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\Test;
 class QuestionTest extends TestCase
 {
     use DatabaseMigrations;
-    #[Test]
+    
     public function it_calculates_success_rate()
     {
         $question = Question::factory()->create([
@@ -21,7 +21,6 @@ class QuestionTest extends TestCase
         $this->assertEquals(70.0, $question->success_rate);
     }
 
-    #[Test]
     public function it_returns_zero_success_rate_when_unused()
     {
         $question = Question::factory()->create([
@@ -32,7 +31,6 @@ class QuestionTest extends TestCase
         $this->assertEquals(0, $question->success_rate);
     }
 
-    #[Test]
     public function it_returns_answers_as_array()
     {
         $question = Question::factory()->create([
@@ -45,7 +43,6 @@ class QuestionTest extends TestCase
         $this->assertEquals(['a' => 'Answer A', 'b' => 'Answer B', 'c' => 'Answer C', 'd' => 'Answer D'], $answers);
     }
 
-    #[Test]
     public function it_returns_difficulty_label()
     {
         $q1 = Question::factory()->create(['difficulty' => 'medium']);

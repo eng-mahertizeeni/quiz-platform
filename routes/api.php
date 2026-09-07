@@ -12,13 +12,6 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\QuestionSubmissionController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
-
-// Public routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -29,24 +22,20 @@ Route::get('/leaderboard', [LeaderboardController::class, 'index']);
 Route::get('/leaderboard/statistics', [LeaderboardController::class, 'statistics']);
 Route::get('/leaderboard/categories', [LeaderboardController::class, 'categoryStats']);
 
-// Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
-    // Auth
+    
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
-    // Profile
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::delete('/profile', [ProfileController::class, 'destroy']);
 
-    // Practice
     Route::get('/practice/categories', [PracticeController::class, 'categories']);
     Route::get('/practice/{category}', [PracticeController::class, 'nextQuestion']);
     Route::post('/practice/answer', [PracticeController::class, 'answer']);
 
-    // Game
     Route::get('/games', [GameController::class, 'index']);
     Route::post('/games', [GameController::class, 'store']);
     Route::get('/games/{session:code}', [GameController::class, 'show']);
@@ -60,7 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/games/{session:code}/round/{round}/power/steal', [GameController::class, 'usePowerSteal']);
     Route::get('/games/{session:code}/result', [GameController::class, 'result']);
 
-    // Bluff
     Route::get('/bluff', [BluffGameController::class, 'index']);
     Route::post('/bluff', [BluffGameController::class, 'store']);
     Route::post('/bluff/join', [BluffGameController::class, 'join']);
@@ -73,7 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bluff/{code}/round/{round}/answer', [BluffGameController::class, 'submitAnswer']);
     Route::post('/bluff/{code}/round/{round}/vote', [BluffGameController::class, 'submitVote']);
 
-    // Kuraiyat (أنا مين)
     Route::get('/kuraiyat/games', [KuraiyatController::class, 'games']);
     Route::get('/kuraiyat', [KuraiyatController::class, 'index']);
     Route::post('/kuraiyat', [KuraiyatController::class, 'store']);
@@ -83,14 +70,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/kuraiyat/{code}/skip', [KuraiyatController::class, 'skip']);
     Route::get('/kuraiyat/{code}/results', [KuraiyatController::class, 'results']);
 
-    // Question submissions
     Route::post('/questions/submit', [QuestionSubmissionController::class, 'store']);
     Route::get('/questions/my-submissions', [QuestionSubmissionController::class, 'mySubmissions']);
 
-    // Leaderboard
     Route::get('/leaderboard/user-stats', [LeaderboardController::class, 'userStats']);
 
-    // Admin routes
     Route::prefix('admin')->middleware('admin')->group(function () {
         Route::get('/dashboard', [Admin\DashboardController::class, 'index']);
 

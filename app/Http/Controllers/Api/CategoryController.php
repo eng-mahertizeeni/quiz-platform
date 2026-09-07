@@ -10,15 +10,7 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    /**
-     * @OA\Get(
-     *      path="/api/categories",
-     *      description="List all active categories with question counts.",
-     *      tags={"Categories"},
-     *      @OA\Parameter(ref="#/components/parameters/Accept-Language"),
-     *      @OA\Response(response=200, description="List of categories"),
-     * )
-     */
+    
     public function index(Request $request): JsonResponse
     {
         $query = Category::active()->withCount(['questions' => fn($q) => $q->active()]);
@@ -47,16 +39,6 @@ class CategoryController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/categories/{id}",
-     *      description="Get a single category with questions.",
-     *      tags={"Categories"},
-     *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\Response(response=200, description="Category details"),
-     *      @OA\Response(response=404, description="Category not found")
-     * )
-     */
     public function show(Category $category): JsonResponse
     {
         $category->loadCount(['questions' => fn($q) => $q->active()]);

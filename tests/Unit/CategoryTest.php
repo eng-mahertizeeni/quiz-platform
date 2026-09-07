@@ -11,14 +11,13 @@ use PHPUnit\Framework\Attributes\Test;
 class CategoryTest extends TestCase
 {
     use DatabaseMigrations;
-    #[Test]
+    
     public function it_auto_generates_slug_on_create()
     {
         $category = Category::create(['name' => 'Test Category']);
         $this->assertEquals('test-category', $category->slug);
     }
 
-    #[Test]
     public function it_checks_enough_questions()
     {
         $category = Category::factory()->create();
@@ -45,7 +44,6 @@ class CategoryTest extends TestCase
         $this->assertTrue($category->hasEnoughQuestions());
     }
 
-    #[Test]
     public function it_detects_insufficient_questions()
     {
         $category = Category::factory()->create();

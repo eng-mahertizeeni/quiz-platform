@@ -9,10 +9,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $admin = DB::table('users')->orderBy('id')->first();
-        $adminId = $admin?->id ?? 1;
+        
+        $adminId = DB::table('users')->orderBy('id')->value('id');
 
-        $categoryIds = range(67, 81);
+        $nominalSlugs = [
+            67 => 'greek-mythology', 68 => 'philosophy', 69 => 'artificial-intelligence',
+            70 => 'psychology', 71 => 'natural-phenomena', 72 => 'world-languages',
+            73 => 'harry-potter', 74 => 'marvel', 75 => 'netflix-series',
+            76 => 'korean-culture', 77 => 'esports', 78 => 'energy-environment',
+            79 => 'puzzles-logic', 80 => 'exploration', 81 => 'digital-culture',
+        ];
+        $resolvedIds = DB::table('categories')->whereIn('slug', $nominalSlugs)->pluck('id', 'slug');
+        $categoryIds = [];
+        foreach ($nominalSlugs as $nominal => $slug) {
+            $categoryIds[] = $resolvedIds[$slug] ?? $nominal;
+        }
 
         foreach ($categoryIds as $catId) {
             $bluffQuestions = DB::table('bluff_questions')
@@ -59,13 +70,12 @@ return new class extends Migration
 
     private function generateWrongAnswers(string $correct, array $pool): array
     {
-        // Remove correct answer from pool
+        
         $candidates = array_values(array_filter($pool, fn($a) => $a !== $correct));
         $candidates = array_values(array_unique($candidates));
 
         $wrongs = [];
 
-        // Strategy 1: For numeric answers, use nearby numbers
         $cleanNumeric = $this->extractNumeric($correct);
         if ($cleanNumeric !== null) {
             $variations = [];
@@ -85,7 +95,6 @@ return new class extends Migration
             }
         }
 
-        // Strategy 2: Use other answers from the same category pool
         if (count($wrongs) < 3 && count($candidates) > 0) {
             shuffle($candidates);
             foreach ($candidates as $c) {
@@ -96,7 +105,6 @@ return new class extends Migration
             }
         }
 
-        // Strategy 3: Modify the correct answer (change suffix/prefix)
         if (count($wrongs) < 3) {
             $modifications = [
                 $correct . ' ' . 'القديم',
@@ -119,7 +127,6 @@ return new class extends Migration
             }
         }
 
-        // Strategy 4: Last resort - generic wrong answers in Arabic
         if (count($wrongs) < 3) {
             $fallbacks = [
                 'لا شيء مما ذكر',
@@ -141,7 +148,6 @@ return new class extends Migration
             }
         }
 
-        // Pad to 3 if needed
         while (count($wrongs) < 3) {
             $wrongs[] = 'إجابة ' . (count($wrongs) + 1);
         }
@@ -151,7 +157,7 @@ return new class extends Migration
 
     private function extractNumeric(string $str): ?float
     {
-        // Remove Arabic text, keep just numbers and decimals
+        
         $cleaned = preg_replace('/[^0-9.]/', '', $str);
         if ($cleaned !== '' && is_numeric($cleaned)) {
             return (float) $cleaned;
@@ -161,8 +167,14 @@ return new class extends Migration
 
     public function down(): void
     {
+        $ids = DB::table('categories')->whereIn('slug', [
+            'greek-mythology', 'philosophy', 'artificial-intelligence', 'psychology',
+            'natural-phenomena', 'world-languages', 'harry-potter', 'marvel',
+            'netflix-series', 'korean-culture', 'esports', 'energy-environment',
+            'puzzles-logic', 'exploration', 'digital-culture',
+        ])->pluck('id');
         DB::table('questions')
-            ->whereBetween('category_id', [67, 81])
+            ->whereIn('category_id', $ids)
             ->delete();
     }
 };

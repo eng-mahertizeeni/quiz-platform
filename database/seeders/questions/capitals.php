@@ -12,7 +12,7 @@ return [
     ['category' => 'capitals', 'difficulty' => 'medium', 'question' => 'ما هي عاصمة روسيا؟', 'a' => 'موسكو', 'b' => 'سانت بطرسبرغ', 'c' => 'كييف', 'd' => 'نوفوسيبيرسك', 'correct' => 'a'],
     ['category' => 'capitals', 'difficulty' => 'medium', 'question' => 'ما هي عاصمة كندا؟', 'a' => 'تورنتو', 'b' => 'أوتاوا', 'c' => 'فانكوفر', 'd' => 'مونتريال', 'correct' => 'b'],
     ['category' => 'capitals', 'difficulty' => 'medium', 'question' => 'ما هي عاصمة إيطاليا؟', 'a' => 'ميلانو', 'b' => 'روما', 'c' => 'نابولي', 'd' => 'البندقية', 'correct' => 'b'],
-    ['category' => 'capitals', 'difficulty' => 'medium', 'question' => 'ما هي عاصمة الأرجنتين؟', 'a' => 'بوينس آيرس', 'b' => 'قرطبة', 'c' => 'بوينس آيرس', 'd' => 'بوينس آيرس', 'correct' => 'a'],
+    ['category' => 'capitals', 'difficulty' => 'medium', 'question' => 'ما هي عاصمة الأرجنتين؟', 'a' => 'بوينس آيرس', 'b' => 'قرطبة', 'c' => 'روساريو', 'd' => 'مندوزا', 'correct' => 'a'],
     ['category' => 'capitals', 'difficulty' => 'medium', 'question' => 'ما هي عاصمة جنوب أفريقيا؟', 'a' => 'كيب تاون', 'b' => 'بريتوريا', 'c' => 'جوهانسبرغ', 'd' => 'ديربان', 'correct' => 'b'],
     ['category' => 'capitals', 'difficulty' => 'medium', 'question' => 'ما هي عاصمة الصين؟', 'a' => 'شنغهاي', 'b' => 'بكين', 'c' => 'هونغ كونغ', 'd' => 'غوانزو', 'correct' => 'b'],
     ['category' => 'capitals', 'difficulty' => 'medium', 'question' => 'ما هي عاصمة الإمارات العربية المتحدة؟', 'a' => 'دبي', 'b' => 'أبو ظبي', 'c' => 'الشارقة', 'd' => 'العين', 'correct' => 'b'],

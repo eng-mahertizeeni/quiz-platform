@@ -18,14 +18,12 @@ class ProfileTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    #[Test]
     public function profile_page_is_accessible()
     {
         $response = $this->actingAs($this->user)->get(route('profile.edit'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function profile_can_be_updated()
     {
         $response = $this->actingAs($this->user)->patch(route('profile.update'), [
@@ -39,7 +37,6 @@ class ProfileTest extends TestCase
         $this->assertEquals('newusername', $this->user->fresh()->username);
     }
 
-    #[Test]
     public function password_can_be_updated()
     {
         $response = $this->actingAs($this->user)->put(route('profile.password'), [
@@ -51,7 +48,6 @@ class ProfileTest extends TestCase
         $response->assertSessionHas('success');
     }
 
-    #[Test]
     public function account_can_be_deleted()
     {
         $response = $this->actingAs($this->user)->delete(route('profile.destroy'), [

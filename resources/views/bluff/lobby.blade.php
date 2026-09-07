@@ -90,7 +90,7 @@
                 list.querySelectorAll('.player-name-wrap').forEach(el => {
                     const pid = parseInt(el.closest('[data-player-id]')?.dataset.playerId);
                     if (pid) {
-                        // Keep existing display names for current user
+                        
                     }
                 });
 

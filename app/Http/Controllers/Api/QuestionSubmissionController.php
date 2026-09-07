@@ -16,34 +16,6 @@ class QuestionSubmissionController extends Controller
 {
     public function __construct(private QuestionService $questionService) {}
 
-    /**
-     * @OA\Post(
-     *      path="/api/questions/submit",
-     *      description="Submit a new question for review.",
-     *      tags={"Questions"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="category_id", type="integer", description="Category ID"),
-     *                  @OA\Property(property="question_text", type="string", description="Question text (min 10 chars)"),
-     *                  @OA\Property(property="answer_a", type="string", description="Answer A"),
-     *                  @OA\Property(property="answer_b", type="string", description="Answer B"),
-     *                  @OA\Property(property="answer_c", type="string", description="Answer C"),
-     *                  @OA\Property(property="answer_d", type="string", description="Answer D"),
-     *                  @OA\Property(property="correct_answer", type="string", enum={"a","b","c","d"}, description="Correct answer letter"),
-     *                  @OA\Property(property="difficulty", type="string", enum={"medium","hard","very_hard"}, description="Difficulty level"),
-     *                  @OA\Property(property="image", type="string", format="binary", description="Optional image (max 2MB)"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=201, description="Question submitted"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -71,16 +43,6 @@ class QuestionSubmissionController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/questions/my-submissions",
-     *      description="Get authenticated user's submitted questions.",
-     *      tags={"Questions"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Response(response=200, description="List of submissions"),
-     *      @OA\Response(response=401, description="Unauthenticated")
-     * )
-     */
     public function mySubmissions(): JsonResponse
     {
         $submissions = SubmittedQuestion::where('user_id', Auth::id())

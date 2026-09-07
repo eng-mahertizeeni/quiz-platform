@@ -11,7 +11,8 @@
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th>
+
                                 <th>المستخدم</th>
                                 <th>النقاط</th>
                                 <th>الألعاب</th>

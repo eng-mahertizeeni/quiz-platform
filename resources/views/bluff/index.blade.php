@@ -263,13 +263,16 @@
         user-select: none;
     }
     .cat-card:hover {
-        border-color: var(--cat-color, #6B7280);
+        border-color: var(--cat-color, 
+
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .cat-card[data-selected="true"] {
-        border-color: var(--cat-color, #6B7280);
-        background: color-mix(in srgb, var(--cat-color, #6B7280) 12%, var(--bg-card));
+        border-color: var(--cat-color, 
+
+        background: color-mix(in srgb, var(--cat-color, 
+
     }
     .cat-card .cat-checkbox {
         position: absolute;
@@ -286,7 +289,8 @@
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: var(--cat-color, #6B7280);
+        background: var(--cat-color, 
+
         display: flex;
         align-items: center;
         justify-content: center;
@@ -295,7 +299,8 @@
         transition: all 0.2s ease;
     }
     .cat-check-mark i {
-        color: #fff;
+        color: 
+
         font-size: 0.7rem;
     }
     .cat-card[data-selected="true"] .cat-check-mark {

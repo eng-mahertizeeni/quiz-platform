@@ -11,8 +11,10 @@ return new class extends Migration
         Schema::create('kuraiyat_games', function (Blueprint $table) {
             $table->id();
             $table->string('code', 6)->unique();
-            $table->string('type'); // head_to_head, who_am_i, quick_challenge
-            $table->string('status')->default('waiting'); // waiting, playing, finished
+            $table->string('type'); 
+
+            $table->string('status')->default('waiting'); 
+
             $table->foreignId('created_by')->constrained('users');
             $table->integer('current_round')->default(0);
             $table->integer('total_rounds')->default(5);
@@ -37,7 +39,8 @@ return new class extends Migration
             $table->foreignId('kuraiyat_game_id')->constrained()->cascadeOnDelete();
             $table->integer('round_number');
             $table->foreignId('question_id')->constrained('questions');
-            $table->string('status')->default('pending'); // pending, answered, finished, skipped
+            $table->string('status')->default('pending'); 
+
             $table->foreignId('answered_by')->nullable()->constrained('kuraiyat_players');
             $table->string('answer')->nullable();
             $table->boolean('is_correct')->nullable();

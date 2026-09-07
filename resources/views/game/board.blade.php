@@ -66,10 +66,16 @@
     function openQuestion(roundId) {
         const code = '{{ $session->code }}';
         fetch(`/game/${code}/round/${roundId}/question`)
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('تعذر تحميل السؤال');
+                return r.json();
+            })
             .then(data => {
                 if (data.error) { alert(data.error); return; }
                 showQuestionModal(data);
+            })
+            .catch(() => {
+                alert('حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى');
             });
     }
 
@@ -121,9 +127,16 @@
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
             body: JSON.stringify({ answer, team_id: teamId, time_taken: 0 })
         })
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) throw new Error('تعذر إرسال الإجابة');
+            return r.json();
+        })
         .then(data => {
-            if (data.error) { alert(data.error); return; }
+            if (data.error) {
+                alert(data.error);
+                document.querySelectorAll('.answer-btn').forEach(b => b.disabled = false);
+                return;
+            }
             const isCorrect = data.is_correct;
             const correctAns = data.correct_answer;
             document.querySelectorAll('.answer-btn').forEach(b => {
@@ -135,6 +148,10 @@
                 bootstrap.Modal.getInstance(document.getElementById('questionModal'))?.hide();
                 location.reload();
             }, 2000);
+        })
+        .catch(() => {
+            alert('حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى');
+            document.querySelectorAll('.answer-btn').forEach(b => b.disabled = false);
         });
     }
 </script>

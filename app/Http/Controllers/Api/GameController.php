@@ -21,31 +21,6 @@ class GameController extends Controller
 
     public function __construct(private GameService $gameService) {}
 
-    /**
-     * @OA\Post(
-     *      path="/api/games",
-     *      description="Create a new game session.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="team_one_name", type="string", description="Name of team one"),
-     *                  @OA\Property(property="team_two_name", type="string", description="Name of team two (must differ)"),
-     *                  @OA\Property(property="team_one_color", type="string", description="Hex color for team one"),
-     *                  @OA\Property(property="team_two_color", type="string", description="Hex color for team two"),
-     *                  @OA\Property(property="timer_seconds", type="integer", description="Timer per question (10-120)"),
-     *                  @OA\Property(property="sound_enabled", type="boolean", description="Enable sound effects"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=201, description="Game created"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -65,18 +40,6 @@ class GameController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/games/{session}/categories",
-     *      description="Get available categories for a game session.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string"), description="Game code or ID"),
-     *      @OA\Response(response=200, description="Categories list"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Not found")
-     * )
-     */
     public function categories(GameSession $session): JsonResponse
     {
         $this->authorize('manage', $session);
@@ -95,27 +58,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/games/{session}/categories",
-     *      description="Attach categories to a game session.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string"), description="Game code or ID"),
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="category_ids", type="array", @OA\Items(type="integer"), description="Array of category IDs"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Categories attached"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function attachCategories(Request $request, GameSession $session): JsonResponse
     {
         $this->authorize('manage', $session);
@@ -133,18 +75,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/games/{session}/start",
-     *      description="Start the game session.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string"), description="Game code or ID"),
-     *      @OA\Response(response=200, description="Game started"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=422, description="Cannot start")
-     * )
-     */
     public function start(GameSession $session): JsonResponse
     {
         $this->authorize('start', $session);
@@ -157,18 +87,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/games/{session}/board",
-     *      description="Get the game board with categories and rounds.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string"), description="Game code or ID"),
-     *      @OA\Response(response=200, description="Game board data"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Not found")
-     * )
-     */
     public function board(GameSession $session): JsonResponse
     {
         $this->authorize('view', $session);
@@ -186,18 +104,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/games/{session}/round/{round}/question",
-     *      description="Get the question for a specific round.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Parameter(name="round", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\Response(response=200, description="Question data"),
-     *      @OA\Response(response=403, description="Forbidden")
-     * )
-     */
     public function getQuestion(GameSession $session, GameRound $round): JsonResponse
     {
         $this->authorize('view', $session);
@@ -209,30 +115,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/games/{session}/round/{round}/answer",
-     *      description="Submit an answer for a round.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Parameter(name="round", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="team_id", type="integer", description="Team ID submitting the answer"),
-     *                  @OA\Property(property="answer", type="string", enum={"a","b","c","d"}, description="Selected answer"),
-     *                  @OA\Property(property="time_taken", type="integer", description="Time taken in seconds"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Answer result"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function submitAnswer(Request $request, GameSession $session, GameRound $round): JsonResponse
     {
         $this->authorize('view', $session);
@@ -256,27 +138,6 @@ class GameController extends Controller
         return response()->json($result);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/games/{session}/round/{round}/power/remove",
-     *      description="Use the remove-two-answers power.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Parameter(name="round", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="team_id", type="integer", description="Team ID using the power"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Wrong answers removed"),
-     *      @OA\Response(response=403, description="Forbidden")
-     * )
-     */
     public function usePowerRemove(Request $request, GameSession $session, GameRound $round): JsonResponse
     {
         $this->authorize('view', $session);
@@ -292,27 +153,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/games/{session}/round/{round}/power/steal",
-     *      description="Use the steal question power.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Parameter(name="round", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="team_id", type="integer", description="Team ID stealing the question"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Question stolen"),
-     *      @OA\Response(response=403, description="Forbidden")
-     * )
-     */
     public function usePowerSteal(Request $request, GameSession $session, GameRound $round): JsonResponse
     {
         $this->authorize('view', $session);
@@ -328,17 +168,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/games/{session}/result",
-     *      description="Get the final result of a finished game.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="Game result"),
-     *      @OA\Response(response=403, description="Forbidden")
-     * )
-     */
     public function result(GameSession $session): JsonResponse
     {
         $this->authorize('view', $session);
@@ -355,16 +184,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/games",
-     *      description="List user's game sessions.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Response(response=200, description="List of games"),
-     *      @OA\Response(response=401, description="Unauthenticated")
-     * )
-     */
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -388,17 +207,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/games/{session}",
-     *      description="Get a single game session details.",
-     *      tags={"Games"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="session", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="Game details"),
-     *      @OA\Response(response=404, description="Not found")
-     * )
-     */
     public function show(GameSession $session): JsonResponse
     {
         $this->authorize('view', $session);

@@ -8,23 +8,9 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * @OA\Tag(name="Admin Users", description="Admin user management endpoints")
- */
 class UserController extends Controller
 {
-    /**
-     * @OA\Get(
-     *      path="/api/admin/users",
-     *      description="List all users.",
-     *      tags={"Admin Users"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="search", in="query", @OA\Schema(type="string")),
-     *      @OA\Parameter(name="role", in="query", @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="List of users"),
-     *      @OA\Response(response=403, description="Forbidden - Admin only")
-     * )
-     */
+    
     public function index(Request $request): JsonResponse
     {
         $query = User::withTrashed();
@@ -54,18 +40,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/admin/users/{user}",
-     *      description="Get user details with game sessions and submissions.",
-     *      tags={"Admin Users"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="user", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\Response(response=200, description="User details"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Not found")
-     * )
-     */
     public function show(User $user): JsonResponse
     {
         $user->load(['gameSessions', 'submittedQuestions.category']);
@@ -77,18 +51,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/admin/users/{user}/toggle-status",
-     *      description="Toggle active/inactive status of a user.",
-     *      tags={"Admin Users"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="user", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\Response(response=200, description="Status toggled"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Not found")
-     * )
-     */
     public function toggleStatus(User $user): JsonResponse
     {
         if ($user->isAdmin()) {
@@ -103,18 +65,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Delete(
-     *      path="/api/admin/users/{user}",
-     *      description="Delete a user account.",
-     *      tags={"Admin Users"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="user", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\Response(response=200, description="User deleted"),
-     *      @OA\Response(response=403, description="Forbidden - Cannot delete admin"),
-     *      @OA\Response(response=404, description="Not found")
-     * )
-     */
     public function destroy(User $user): JsonResponse
     {
         if ($user->isAdmin()) {

@@ -8,6 +8,7 @@ use App\Models\BluffQuestion;
 use App\Models\BluffRound;
 use App\Models\BluffRoundAnswer;
 use App\Models\BluffVote;
+use App\Models\Category;
 use App\Models\User;
 use App\Services\BluffService;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -22,6 +23,7 @@ class BluffGameTest extends TestCase
     private User $player2;
     private User $player3;
     private BluffService $service;
+    private array $categoryIds;
 
     protected function setUp(): void
     {
@@ -30,6 +32,9 @@ class BluffGameTest extends TestCase
         $this->player2 = User::factory()->create();
         $this->player3 = User::factory()->create();
         $this->service = app(BluffService::class);
+
+        $category = Category::factory()->create();
+        $this->categoryIds = [$category->id];
 
         $questions = [
             ['question_text' => 'ما هي أكبر قارة؟', 'correct_answer' => 'آسيا'],
@@ -42,21 +47,20 @@ class BluffGameTest extends TestCase
             ['question_text' => 'ما هو أسرع حيوان؟', 'correct_answer' => 'الفهد'],
         ];
         foreach ($questions as $q) {
-            BluffQuestion::create($q);
+            BluffQuestion::create(array_merge($q, ['category_id' => $category->id]));
         }
     }
 
-    #[Test]
     public function guest_cannot_access_bluff()
     {
         $this->get(route('bluff.index'))->assertRedirect(route('login', absolute: false));
     }
 
-    #[Test]
     public function user_can_create_game()
     {
         $response = $this->actingAs($this->creator)->post(route('bluff.store'), [
             'total_rounds' => 5,
+            'categories' => $this->categoryIds,
         ]);
 
         $game = BluffGame::where('bluff_creator_id', $this->creator->id)->first();
@@ -66,10 +70,9 @@ class BluffGameTest extends TestCase
         $response->assertRedirect(route('bluff.lobby', $game->code));
     }
 
-    #[Test]
     public function user_can_join_game()
     {
-        $game = $this->service->createGame($this->creator->id, 3);
+        $game = $this->service->createGame($this->creator->id, 3, $this->categoryIds);
 
         $response = $this->actingAs($this->player2)
             ->post(route('bluff.join'), ['code' => $game->code]);
@@ -81,10 +84,9 @@ class BluffGameTest extends TestCase
         ]);
     }
 
-    #[Test]
     public function cannot_join_with_wrong_code()
     {
-        $this->service->createGame($this->creator->id, 3);
+        $this->service->createGame($this->creator->id, 3, $this->categoryIds);
 
         $response = $this->actingAs($this->player2)
             ->post(route('bluff.join'), ['code' => 'XXXXXX']);
@@ -92,10 +94,9 @@ class BluffGameTest extends TestCase
         $response->assertSessionHas('error');
     }
 
-    #[Test]
     public function creator_can_start_game()
     {
-        $game = $this->service->createGame($this->creator->id, 3);
+        $game = $this->service->createGame($this->creator->id, 3, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
 
         $response = $this->actingAs($this->creator)
@@ -106,10 +107,9 @@ class BluffGameTest extends TestCase
         $this->assertEquals(1, $game->fresh()->current_round);
     }
 
-    #[Test]
     public function non_creator_cannot_start_game()
     {
-        $game = $this->service->createGame($this->creator->id, 3);
+        $game = $this->service->createGame($this->creator->id, 3, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
 
         $response = $this->actingAs($this->player2)
@@ -118,10 +118,9 @@ class BluffGameTest extends TestCase
         $response->assertSessionHas('error');
     }
 
-    #[Test]
     public function game_needs_min_2_players()
     {
-        $game = $this->service->createGame($this->creator->id, 3);
+        $game = $this->service->createGame($this->creator->id, 3, $this->categoryIds);
 
         $response = $this->actingAs($this->creator)
             ->post(route('bluff.start', $game->code));
@@ -129,10 +128,9 @@ class BluffGameTest extends TestCase
         $response->assertSessionHas('error');
     }
 
-    #[Test]
     public function full_game_flow_works()
     {
-        $game = $this->service->createGame($this->creator->id, 3);
+        $game = $this->service->createGame($this->creator->id, 3, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
         $this->service->joinGame($game->code, $this->player3->id);
         $this->service->startGame($game);
@@ -194,10 +192,9 @@ class BluffGameTest extends TestCase
         $this->assertEquals(2, $game->fresh()->current_round);
     }
 
-    #[Test]
     public function game_ends_after_all_rounds()
     {
-        $game = $this->service->createGame($this->creator->id, 1);
+        $game = $this->service->createGame($this->creator->id, 1, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
         $this->service->startGame($game);
         $game = $game->fresh();
@@ -221,10 +218,9 @@ class BluffGameTest extends TestCase
         $this->assertEquals('finished', $game->fresh()->status);
     }
 
-    #[Test]
     public function cannot_vote_for_own_answer()
     {
-        $game = $this->service->createGame($this->creator->id, 1);
+        $game = $this->service->createGame($this->creator->id, 1, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
         $this->service->startGame($game);
         $game = $game->fresh();
@@ -247,10 +243,9 @@ class BluffGameTest extends TestCase
         $this->assertEquals('لا يمكنك التصويت على إجابتك الخاصة', $result['message']);
     }
 
-    #[Test]
     public function cannot_submit_empty_answer()
     {
-        $game = $this->service->createGame($this->creator->id, 1);
+        $game = $this->service->createGame($this->creator->id, 1, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
         $this->service->startGame($game);
         $game = $game->fresh();
@@ -269,10 +264,9 @@ class BluffGameTest extends TestCase
         $this->assertEquals('error', $result['status']);
     }
 
-    #[Test]
     public function cannot_submit_correct_answer()
     {
-        $game = $this->service->createGame($this->creator->id, 1);
+        $game = $this->service->createGame($this->creator->id, 1, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
         $this->service->startGame($game);
         $game = $game->fresh();
@@ -286,10 +280,9 @@ class BluffGameTest extends TestCase
         $this->assertEquals('correct_answer_rejected', $result['status']);
     }
 
-    #[Test]
     public function getGameState_returns_correct_round_data()
     {
-        $game = $this->service->createGame($this->creator->id, 1);
+        $game = $this->service->createGame($this->creator->id, 1, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
         $this->service->startGame($game);
         $game = $game->fresh();
@@ -303,10 +296,9 @@ class BluffGameTest extends TestCase
         $this->assertEquals('answering', $state['current_round_data']['status']);
     }
 
-    #[Test]
     public function final_results_are_ordered_by_score()
     {
-        $game = $this->service->createGame($this->creator->id, 1);
+        $game = $this->service->createGame($this->creator->id, 1, $this->categoryIds);
         $this->service->joinGame($game->code, $this->player2->id);
         $this->service->startGame($game);
         $game = $game->fresh();

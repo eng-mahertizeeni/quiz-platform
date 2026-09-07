@@ -14,16 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PracticeController extends Controller
 {
-    /**
-     * @OA\Get(
-     *      path="/api/practice/categories",
-     *      description="Get categories with user's practice progress.",
-     *      tags={"Practice"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Response(response=200, description="Categories with progress"),
-     *      @OA\Response(response=401, description="Unauthenticated")
-     * )
-     */
+    
     public function categories(): JsonResponse
     {
         $user = Auth::user();
@@ -54,18 +45,6 @@ class PracticeController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/practice/{category}",
-     *      description="Get next unanswered question for a category.",
-     *      tags={"Practice"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="category", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\Response(response=200, description="Question data"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=404, description="Category not found")
-     * )
-     */
     public function nextQuestion(Category $category): JsonResponse
     {
         $user = Auth::user();
@@ -102,27 +81,6 @@ class PracticeController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/practice/answer",
-     *      description="Submit an answer for a practice question.",
-     *      tags={"Practice"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="question_id", type="integer", description="Question ID"),
-     *                  @OA\Property(property="answer", type="string", enum={"a","b","c","d"}, description="Selected answer"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Answer result"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function answer(Request $request): JsonResponse
     {
         $validated = $request->validate([

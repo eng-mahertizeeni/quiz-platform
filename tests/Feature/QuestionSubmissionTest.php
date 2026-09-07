@@ -21,21 +21,18 @@ class QuestionSubmissionTest extends TestCase
         $this->category = Category::factory()->create();
     }
 
-    #[Test]
     public function submit_question_page_is_accessible()
     {
         $response = $this->actingAs($this->user)->get(route('questions.submit'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function guests_cannot_submit_questions()
     {
         $response = $this->get(route('questions.submit'));
         $response->assertRedirect(route('login', absolute: false));
     }
 
-    #[Test]
     public function user_can_submit_question()
     {
         $response = $this->actingAs($this->user)->post(route('questions.store'), [
@@ -56,7 +53,6 @@ class QuestionSubmissionTest extends TestCase
         ]);
     }
 
-    #[Test]
     public function my_submissions_page_is_accessible()
     {
         $response = $this->actingAs($this->user)->get(route('questions.my-submissions'));

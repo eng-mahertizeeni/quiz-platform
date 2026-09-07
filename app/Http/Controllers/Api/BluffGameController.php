@@ -18,16 +18,6 @@ class BluffGameController extends Controller
         protected BluffService $bluffService
     ) {}
 
-    /**
-     * @OA\Get(
-     *      path="/api/bluff",
-     *      description="List user's bluff games (active and past).",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Response(response=200, description="List of bluff games"),
-     *      @OA\Response(response=401, description="Unauthenticated")
-     * )
-     */
     public function index(): JsonResponse
     {
         $activeGames = BluffGame::where('status', 'playing')
@@ -49,26 +39,6 @@ class BluffGameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/bluff",
-     *      description="Create a new bluff game.",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="total_rounds", type="integer", description="Number of rounds (3-15)"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=201, description="Game created"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function store(Request $request): JsonResponse
     {
         $request->validate([
@@ -91,26 +61,6 @@ class BluffGameController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/bluff/join",
-     *      description="Join an existing bluff game by code.",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="code", type="string", description="Game code to join"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Joined game"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=404, description="Game not found")
-     * )
-     */
     public function join(Request $request): JsonResponse
     {
         $request->validate(['code' => 'required|string|size:6']);
@@ -123,18 +73,6 @@ class BluffGameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/bluff/{code}/lobby",
-     *      description="Get lobby data for a bluff game.",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="code", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="Lobby data"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=404, description="Game not found")
-     * )
-     */
     public function lobby(string $code): JsonResponse
     {
         $game = BluffGame::where('code', $code)
@@ -146,19 +84,6 @@ class BluffGameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/bluff/{code}/start",
-     *      description="Start a bluff game (creator only).",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="code", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="Game started"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Game not found")
-     * )
-     */
     public function start(string $code): JsonResponse
     {
         $game = BluffGame::where('code', $code)->firstOrFail();
@@ -175,18 +100,6 @@ class BluffGameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/bluff/{code}/state",
-     *      description="Get the current game state for playing.",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="code", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="Game state"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=404, description="Game not found")
-     * )
-     */
     public function state(string $code): JsonResponse
     {
         $game = BluffGame::where('code', $code)->firstOrFail();
@@ -195,28 +108,6 @@ class BluffGameController extends Controller
         return response()->json($state);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/bluff/{code}/round/{round}/answer",
-     *      description="Submit a bluff answer for the current round.",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="code", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Parameter(name="round", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="answer_text", type="string", description="Your fake answer text"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Answer submitted"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function submitAnswer(Request $request, string $code, BluffRound $round): JsonResponse
     {
         $game = BluffGame::where('code', $code)->firstOrFail();
@@ -231,28 +122,6 @@ class BluffGameController extends Controller
         return response()->json($result);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/bluff/{code}/round/{round}/vote",
-     *      description="Vote for a bluff answer.",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="code", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Parameter(name="round", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="answer_id", type="integer", description="Answer ID to vote for"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Vote submitted"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function submitVote(Request $request, string $code, BluffRound $round): JsonResponse
     {
         $game = BluffGame::where('code', $code)->firstOrFail();
@@ -267,19 +136,6 @@ class BluffGameController extends Controller
         return response()->json($result);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/bluff/{code}/advance",
-     *      description="Advance to the next round (creator only).",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="code", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="Next round started"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=403, description="Forbidden"),
-     *      @OA\Response(response=404, description="Game not found")
-     * )
-     */
     public function advanceRound(string $code): JsonResponse
     {
         $game = BluffGame::where('code', $code)->firstOrFail();
@@ -303,18 +159,6 @@ class BluffGameController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/bluff/{code}/results",
-     *      description="Get final results of a finished bluff game.",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="code", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="Final results"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=404, description="Game not found")
-     * )
-     */
     public function results(string $code): JsonResponse
     {
         $game = BluffGame::where('code', $code)->firstOrFail();
@@ -323,18 +167,6 @@ class BluffGameController extends Controller
         return response()->json($results);
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/bluff/{code}/history",
-     *      description="Get round-by-round history of a finished bluff game.",
-     *      tags={"Bluff"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Parameter(name="code", in="path", required=true, @OA\Schema(type="string")),
-     *      @OA\Response(response=200, description="Round history"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=404, description="Game not found")
-     * )
-     */
     public function history(string $code): JsonResponse
     {
         $game = BluffGame::where('code', $code)->firstOrFail();

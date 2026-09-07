@@ -67,10 +67,12 @@
     transition: all 0.3s;
 }
 .clue-dot.active {
-    background: #F59E0B; border-color: #F59E0B; color: #000;
+    background: 
+
 }
 .clue-dot.revealed {
-    background: #10B981; border-color: #10B981; color: #fff;
+    background: 
+
 }
 </style>
 <script>

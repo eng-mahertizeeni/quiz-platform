@@ -1,9 +1,4 @@
 <?php
-/**
- * Fix imbalanced answers in the database directly.
- * Run: php artisan db:seed --class=QuestionSeeder  (first if needed)
- * Then: php database/seeders/fix_answers.php
- */
 
 require __DIR__ . '/../../vendor/autoload.php';
 $app = require __DIR__ . '/../../bootstrap/app.php';
@@ -23,7 +18,6 @@ $imbalanced = 0;
 $hardImbalanced = 0;
 $totalImbalanced = 0;
 
-// Fix very_hard
 $questions = Question::where('difficulty', 'very_hard')->where('status', 'active')->get();
 foreach ($questions as $q) {
     $answers = ['a' => $q->answer_a, 'b' => $q->answer_b, 'c' => $q->answer_c, 'd' => $q->answer_d];
@@ -46,7 +40,6 @@ foreach ($questions as $q) {
     }
 }
 
-// Fix hard
 $questions = Question::where('difficulty', 'hard')->where('status', 'active')->get();
 foreach ($questions as $q) {
     $answers = ['a' => $q->answer_a, 'b' => $q->answer_b, 'c' => $q->answer_c, 'd' => $q->answer_d];
@@ -71,7 +64,6 @@ foreach ($questions as $q) {
 
 echo "Fixed very_hard: {$imbalanced}, hard: {$hardImbalanced}\n";
 
-// Now export back to seed files
 $questions = Question::where('status', 'active')->with('category')->get()->groupBy(fn($q) => $q->category->slug);
 
 foreach ($questions as $slug => $items) {

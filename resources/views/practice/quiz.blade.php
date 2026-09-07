@@ -95,9 +95,16 @@ function submitAnswer(answer) {
             answer: answer
         })
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error('تعذر إرسال الإجابة');
+        return r.json();
+    })
     .then(data => {
         showFeedback(data);
+    })
+    .catch(() => {
+        alert('حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى');
+        document.querySelectorAll('.answer-btn').forEach(b => b.disabled = false);
     });
 }
 
@@ -132,7 +139,10 @@ function loadNextQuestion() {
     document.getElementById('nextBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري التحميل...';
 
     fetch('{{ route("practice.next", $category->slug) }}')
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error('تعذر تحميل السؤال التالي');
+        return r.json();
+    })
     .then(data => {
         if (data.done) {
             document.getElementById('questionContainer').classList.add('d-none');
@@ -194,6 +204,11 @@ function loadNextQuestion() {
         document.getElementById('nextBtn').disabled = false;
         document.getElementById('nextBtn').innerHTML = '<i class="fas fa-arrow-left me-2"></i>السؤال التالي';
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+    .catch(() => {
+        alert('حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى');
+        document.getElementById('nextBtn').disabled = false;
+        document.getElementById('nextBtn').innerHTML = '<i class="fas fa-arrow-left me-2"></i>السؤال التالي';
     });
 }
 

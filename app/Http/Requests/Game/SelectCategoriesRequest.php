@@ -23,7 +23,7 @@ class SelectCategoriesRequest extends FormRequest
 
     public function withValidator($validator): void
     {
-        // removed hasEnoughQuestions check - all categories are selectable
+        
     }
 
     public function messages(): array

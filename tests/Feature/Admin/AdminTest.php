@@ -21,14 +21,12 @@ class AdminTest extends TestCase
         $this->admin = User::factory()->create(['role' => 'admin']);
     }
 
-    #[Test]
     public function admin_dashboard_is_accessible()
     {
         $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function non_admin_cannot_access_admin()
     {
         $user = User::factory()->create(['role' => 'user']);
@@ -37,14 +35,12 @@ class AdminTest extends TestCase
         $response->assertStatus(403);
     }
 
-    #[Test]
     public function categories_index_is_accessible()
     {
         $response = $this->actingAs($this->admin)->get(route('admin.categories.index'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function category_can_be_created()
     {
         $response = $this->actingAs($this->admin)->post(route('admin.categories.store'), [
@@ -59,7 +55,6 @@ class AdminTest extends TestCase
         $this->assertDatabaseHas('categories', ['name' => 'New Category']);
     }
 
-    #[Test]
     public function category_can_be_updated()
     {
         $category = Category::factory()->create();
@@ -74,7 +69,6 @@ class AdminTest extends TestCase
         $this->assertDatabaseHas('categories', ['name' => 'Updated Name']);
     }
 
-    #[Test]
     public function category_can_be_deleted()
     {
         $category = Category::factory()->create();
@@ -84,14 +78,12 @@ class AdminTest extends TestCase
         $this->assertSoftDeleted($category);
     }
 
-    #[Test]
     public function questions_index_is_accessible()
     {
         $response = $this->actingAs($this->admin)->get(route('admin.questions.index'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function question_can_be_created()
     {
         $category = Category::factory()->create();
@@ -111,14 +103,12 @@ class AdminTest extends TestCase
         $this->assertDatabaseHas('questions', ['question_text' => 'Test question?']);
     }
 
-    #[Test]
     public function submissions_page_is_accessible()
     {
         $response = $this->actingAs($this->admin)->get(route('admin.questions.submissions'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function submission_can_be_approved()
     {
         $category = Category::factory()->create();
@@ -135,7 +125,6 @@ class AdminTest extends TestCase
         $this->assertNotNull($submission->fresh()->converted_question_id);
     }
 
-    #[Test]
     public function submission_can_be_rejected()
     {
         $submission = SubmittedQuestion::factory()->create(['status' => 'pending']);
@@ -149,14 +138,12 @@ class AdminTest extends TestCase
         $this->assertEquals('Not relevant', $submission->fresh()->rejection_reason);
     }
 
-    #[Test]
     public function users_index_is_accessible()
     {
         $response = $this->actingAs($this->admin)->get(route('admin.users.index'));
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function user_show_page_is_accessible()
     {
         $user = User::factory()->create();
@@ -165,7 +152,6 @@ class AdminTest extends TestCase
         $response->assertStatus(200);
     }
 
-    #[Test]
     public function user_can_be_toggled()
     {
         $user = User::factory()->create(['is_active' => true]);
@@ -176,14 +162,12 @@ class AdminTest extends TestCase
         $this->assertFalse($user->fresh()->is_active);
     }
 
-    #[Test]
     public function admin_cannot_be_toggled()
     {
         $response = $this->actingAs($this->admin)->post(route('admin.users.toggle-status', $this->admin));
         $response->assertSessionHas('error');
     }
 
-    #[Test]
     public function user_can_be_deleted()
     {
         $user = User::factory()->create();

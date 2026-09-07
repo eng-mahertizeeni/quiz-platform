@@ -12,16 +12,7 @@ use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
-    /**
-     * @OA\Get(
-     *      path="/api/profile",
-     *      description="Get authenticated user's profile details.",
-     *      tags={"Profile"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Response(response=200, description="Profile data"),
-     *      @OA\Response(response=401, description="Unauthenticated")
-     * )
-     */
+    
     public function show(Request $request): JsonResponse
     {
         return response()->json([
@@ -29,29 +20,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/profile",
-     *      description="Update user profile information.",
-     *      tags={"Profile"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="name", type="string", description="User full name"),
-     *                  @OA\Property(property="username", type="string", description="Unique username (alpha_dash)"),
-     *                  @OA\Property(property="email", type="string", format="email", description="Unique email address"),
-     *                  @OA\Property(property="avatar", type="string", format="binary", description="Avatar image (jpg,jpeg,png,webp max 2MB)"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Profile updated"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function update(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -84,28 +52,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/profile/password",
-     *      description="Update user password.",
-     *      tags={"Profile"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\RequestBody(
-     *           required=true,
-     *           @OA\MediaType(
-     *              mediaType="multipart/form-data",
-     *              @OA\Schema(
-     *                  @OA\Property(property="current_password", type="string", format="password", description="Current password"),
-     *                  @OA\Property(property="password", type="string", format="password", description="New password (min 8 chars)"),
-     *                  @OA\Property(property="password_confirmation", type="string", format="password", description="Confirm new password"),
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(response=200, description="Password updated"),
-     *      @OA\Response(response=401, description="Unauthenticated"),
-     *      @OA\Response(response=422, description="Validation error")
-     * )
-     */
     public function updatePassword(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -126,16 +72,6 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Delete(
-     *      path="/api/profile",
-     *      description="Delete the authenticated user's account.",
-     *      tags={"Profile"},
-     *      security={{"bearer_token":{}}},
-     *      @OA\Response(response=200, description="Account deleted"),
-     *      @OA\Response(response=401, description="Unauthenticated")
-     * )
-     */
     public function destroy(Request $request): JsonResponse
     {
         $user = $request->user();

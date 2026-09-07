@@ -12,7 +12,7 @@ use PHPUnit\Framework\Attributes\Test;
 class GameSessionTest extends TestCase
 {
     use DatabaseMigrations;
-    #[Test]
+    
     public function it_generates_code_on_create()
     {
         $user = User::factory()->create();
@@ -24,7 +24,6 @@ class GameSessionTest extends TestCase
         $this->assertEquals(8, strlen($session->code));
     }
 
-    #[Test]
     public function it_checks_if_active()
     {
         $active = GameSession::factory()->create(['status' => 'active']);
@@ -34,7 +33,6 @@ class GameSessionTest extends TestCase
         $this->assertFalse($finished->isActive());
     }
 
-    #[Test]
     public function it_checks_if_finished()
     {
         $finished = GameSession::factory()->create(['status' => 'finished']);
@@ -44,7 +42,6 @@ class GameSessionTest extends TestCase
         $this->assertFalse($active->isFinished());
     }
 
-    #[Test]
     public function it_calculates_progress_percentage()
     {
         $session = GameSession::factory()->create([
@@ -54,7 +51,6 @@ class GameSessionTest extends TestCase
         $this->assertEquals(25.0, $session->progress_percentage);
     }
 
-    #[Test]
     public function it_returns_zero_progress_when_no_questions()
     {
         $session = GameSession::factory()->create([
