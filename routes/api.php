@@ -5,9 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BluffGameController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\GameController;
-use App\Http\Controllers\Api\KuraiyatController;
 use App\Http\Controllers\Api\LeaderboardController;
-use App\Http\Controllers\Api\PracticeController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\QuestionSubmissionController;
 use Illuminate\Support\Facades\Route;
@@ -31,10 +29,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/password', [ProfileController::class, 'updatePassword']);
     Route::delete('/profile', [ProfileController::class, 'destroy']);
-
-    Route::get('/practice/categories', [PracticeController::class, 'categories']);
-    Route::get('/practice/{category}', [PracticeController::class, 'nextQuestion']);
-    Route::post('/practice/answer', [PracticeController::class, 'answer']);
 
     Route::get('/games', [GameController::class, 'index']);
     Route::post('/games', [GameController::class, 'store']);
@@ -60,15 +54,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bluff/{code}/history', [BluffGameController::class, 'history']);
     Route::post('/bluff/{code}/round/{round}/answer', [BluffGameController::class, 'submitAnswer']);
     Route::post('/bluff/{code}/round/{round}/vote', [BluffGameController::class, 'submitVote']);
-
-    Route::get('/kuraiyat/games', [KuraiyatController::class, 'games']);
-    Route::get('/kuraiyat', [KuraiyatController::class, 'index']);
-    Route::post('/kuraiyat', [KuraiyatController::class, 'store']);
-    Route::get('/kuraiyat/{code}/state', [KuraiyatController::class, 'state']);
-    Route::post('/kuraiyat/{code}/answer', [KuraiyatController::class, 'submitAnswer']);
-    Route::get('/kuraiyat/{code}/clue', [KuraiyatController::class, 'clue']);
-    Route::post('/kuraiyat/{code}/skip', [KuraiyatController::class, 'skip']);
-    Route::get('/kuraiyat/{code}/results', [KuraiyatController::class, 'results']);
 
     Route::post('/questions/submit', [QuestionSubmissionController::class, 'store']);
     Route::get('/questions/my-submissions', [QuestionSubmissionController::class, 'mySubmissions']);

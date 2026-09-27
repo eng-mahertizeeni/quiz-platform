@@ -4,8 +4,6 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Game\GameController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BluffController;
-use App\Http\Controllers\KuraiyatController;
-use App\Http\Controllers\PracticeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionSubmissionController;
 use Illuminate\Support\Facades\Route;
@@ -30,13 +28,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/submit', [QuestionSubmissionController::class, 'create'])->name('submit');
         Route::post('/submit', [QuestionSubmissionController::class, 'store'])->name('store');
         Route::get('/my-submissions', [QuestionSubmissionController::class, 'mySubmissions'])->name('my-submissions');
-    });
-
-    Route::prefix('practice')->name('practice.')->group(function () {
-        Route::get('/', [PracticeController::class, 'index'])->name('index');
-        Route::get('/{category:slug}', [PracticeController::class, 'practice'])->name('quiz');
-        Route::post('/answer', [PracticeController::class, 'answer'])->name('answer');
-        Route::get('/{category:slug}/next', [PracticeController::class, 'next'])->name('next');
     });
 
     Route::prefix('game')->name('game.')->group(function () {
@@ -76,17 +67,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/{code}/round/{round}/answer', [BluffController::class, 'submitAnswer'])->name('answer');
         Route::post('/{code}/round/{round}/vote', [BluffController::class, 'submitVote'])->name('vote');
         Route::get('/{code}/history', [BluffController::class, 'getHistory'])->name('history');
-    });
-
-    Route::prefix('kuraiyat')->name('kuraiyat.')->group(function () {
-        Route::get('/', [KuraiyatController::class, 'index'])->name('index');
-        Route::post('/create', [KuraiyatController::class, 'store'])->name('store');
-        Route::get('/{code}/play', [KuraiyatController::class, 'play'])->name('play');
-        Route::get('/{code}/state', [KuraiyatController::class, 'state'])->name('state');
-        Route::get('/{code}/results', [KuraiyatController::class, 'results'])->name('results');
-        Route::get('/{code}/clue', [KuraiyatController::class, 'getClue'])->name('clue');
-        Route::post('/{code}/skip', [KuraiyatController::class, 'skipRound'])->name('skip');
-        Route::post('/answer', [KuraiyatController::class, 'submitAnswer'])->name('answer');
     });
 });
 
