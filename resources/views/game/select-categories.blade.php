@@ -11,6 +11,8 @@
 
     <form method="POST" action="{{ route('game.categories.attach', $session->code) }}" id="categoriesForm">
         @csrf
+        @foreach($groups as $groupName => $categories)
+        <h5 class="fw-bold mt-4 mb-3">{{ $groupName }}</h5>
         <div class="row g-3">
             @foreach($categories as $cat)
             <div class="col-md-4">
@@ -30,6 +32,7 @@
             </div>
             @endforeach
         </div>
+        @endforeach
 
         <div class="mt-4 d-flex justify-content-between align-items-center">
             <span class="text-muted" id="selectedCount">0 من {{ \App\Models\GameSession::CATEGORIES_COUNT }} فئات مختارة</span>

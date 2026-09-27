@@ -34,6 +34,7 @@ class GameController extends Controller
     {
         $this->authorize('manage', $session);
         $categories = Category::active()
+            ->with('parent')
             ->withCount(['questions' => fn($q) => $q->active()])
             ->orderBy('sort_order')
             ->get()
@@ -42,7 +43,12 @@ class GameController extends Controller
                 return $cat;
             });
 
-        return view('game.select-categories', compact('session', 'categories'));
+        $parentIds = $categories->pluck('parent_id')->filter()->unique();
+        $groups = $categories
+            ->reject(fn($cat) => $parentIds->contains($cat->id))
+            ->groupBy(fn($cat) => $cat->parent?->name ?? 'أخرى');
+
+        return view('game.select-categories', compact('session', 'groups'));
     }
 
     public function attachCategories(SelectCategoriesRequest $request, GameSession $session)

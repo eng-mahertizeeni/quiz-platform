@@ -12,7 +12,7 @@ class Category extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name', 'name_ar', 'slug', 'description', 'icon',
+        'parent_id', 'name', 'name_ar', 'slug', 'description', 'icon',
         'thumbnail', 'color', 'is_featured', 'is_active',
         'sort_order', 'times_played',
     ];
@@ -31,6 +31,16 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
     }
 
     public function questions()
