@@ -59,9 +59,9 @@ class SubmittedQuestion extends Model
     public function getDifficultyLabelAttribute(): string
     {
         return match ($this->difficulty) {
+            'easy' => 'سهل',
             'medium' => 'متوسط',
             'hard' => 'صعب',
-            'very_hard' => 'صعب جداً',
             default => $this->difficulty,
         };
     }

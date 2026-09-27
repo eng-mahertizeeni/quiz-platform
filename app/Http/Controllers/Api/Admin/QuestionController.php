@@ -64,7 +64,7 @@ class QuestionController extends Controller
             'answer_c'       => 'required|string|max:300',
             'answer_d'       => 'required|string|max:300',
             'correct_answer' => 'required|in:a,b,c,d',
-            'difficulty'     => 'required|in:medium,hard,very_hard',
+            'difficulty'     => 'required|in:easy,medium,hard',
             'image'          => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status'         => 'nullable|in:active,inactive',
         ]);
@@ -105,7 +105,7 @@ class QuestionController extends Controller
             'answer_c'       => 'required|string|max:300',
             'answer_d'       => 'required|string|max:300',
             'correct_answer' => 'required|in:a,b,c,d',
-            'difficulty'     => 'required|in:medium,hard,very_hard',
+            'difficulty'     => 'required|in:easy,medium,hard',
             'image'          => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status'         => 'nullable|in:active,inactive',
         ]);

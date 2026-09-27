@@ -14,8 +14,7 @@ class Question extends Model
         'category_id', 'created_by', 'question_text', 'question_text_ar',
         'answer_a', 'answer_b', 'answer_c', 'answer_d',
         'correct_answer', 'difficulty', 'points', 'image',
-        'status', 'times_used', 'times_correct', 'times_wrong',
-        'hint_1', 'hint_2', 'hint_3', 'hint_4', 'hint_5',
+        'status', 'source_file', 'times_used', 'times_correct', 'times_wrong',
     ];
 
     protected $casts = [
@@ -26,9 +25,9 @@ class Question extends Model
     ];
 
     const DIFFICULTY_POINTS = [
-        'medium' => 250,
-        'hard' => 500,
-        'very_hard' => 750,
+        'easy' => 200,
+        'medium' => 400,
+        'hard' => 600,
     ];
 
     public function category()
@@ -87,9 +86,9 @@ class Question extends Model
     public function getDifficultyLabelAttribute(): string
     {
         return match ($this->difficulty) {
+            'easy' => 'سهل',
             'medium' => 'متوسط',
             'hard' => 'صعب',
-            'very_hard' => 'صعب جداً',
             default => $this->difficulty,
         };
     }
@@ -97,9 +96,9 @@ class Question extends Model
     public function getDifficultyColorAttribute(): string
     {
         return match ($this->difficulty) {
+            'easy' => '#10B981',
             'medium' => '#F59E0B',
             'hard' => '#EF4444',
-            'very_hard' => '#7C3AED',
             default => '#6B7280',
         };
     }

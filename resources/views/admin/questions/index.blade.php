@@ -22,9 +22,9 @@
         <div class="col-md-2">
             <select name="difficulty" class="form-select">
                 <option value="">كل الصعوبات</option>
-                <option value="medium" {{ request('difficulty') == 'medium' ? 'selected' : '' }}>متوسط</option>
-                <option value="hard" {{ request('difficulty') == 'hard' ? 'selected' : '' }}>صعب</option>
-                <option value="very_hard" {{ request('difficulty') == 'very_hard' ? 'selected' : '' }}>صعب جداً</option>
+                <option value="easy" {{ request('difficulty') =='easy' ? 'selected' : '' }}>سهل</option>
+                <option value="medium" {{ request('difficulty') =='medium' ? 'selected' : '' }}>متوسط</option>
+                <option value="hard" {{ request('difficulty') =='hard' ? 'selected' : '' }}>صعب</option>
             </select>
         </div>
         <div class="col-md-2">

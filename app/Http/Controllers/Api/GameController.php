@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Game\SelectCategoriesRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\GameRoundResource;
 use App\Http\Resources\GameSessionResource;
@@ -58,16 +59,11 @@ class GameController extends Controller
         ]);
     }
 
-    public function attachCategories(Request $request, GameSession $session): JsonResponse
+    public function attachCategories(SelectCategoriesRequest $request, GameSession $session): JsonResponse
     {
         $this->authorize('manage', $session);
 
-        $validated = $request->validate([
-            'category_ids'   => 'required|array|min:1',
-            'category_ids.*' => 'exists:categories,id',
-        ]);
-
-        $this->gameService->attachCategories($session, $validated['category_ids']);
+        $this->gameService->attachCategories($session, $request->validated()['category_ids']);
 
         return response()->json([
             'message' => 'تم اختيار الفئات بنجاح',

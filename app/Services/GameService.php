@@ -63,15 +63,9 @@ class GameService
         $roundNumber = 1;
 
         foreach ($session->categories as $category) {
-            $difficulties = [
-                ['difficulty' => 'medium', 'points' => 250],
-                ['difficulty' => 'hard', 'points' => 500],
-                ['difficulty' => 'very_hard', 'points' => 750],
-            ];
-
-            foreach ($difficulties as $level) {
+            foreach (Question::DIFFICULTY_POINTS as $difficulty => $points) {
                 $questions = Question::where('category_id', $category->id)
-                    ->where('difficulty', $level['difficulty'])
+                    ->where('difficulty', $difficulty)
                     ->where('status', 'active')
                     ->inRandomOrder()
                     ->limit(2)
@@ -85,7 +79,7 @@ class GameService
                         'category_id' => $category->id,
                         'assigned_team_id' => $assignedTeam->id,
                         'status' => 'pending',
-                        'points_value' => $level['points'],
+                        'points_value' => $points,
                         'round_number' => $roundNumber++,
                     ]);
                 }
@@ -114,11 +108,9 @@ class GameService
             $categoryRounds = $session->rounds->where('category_id', $category->id);
             $board[] = [
                 'category' => $category,
-                'rounds' => [
-                    250 => $categoryRounds->where('points_value', 250)->values(),
-                    500 => $categoryRounds->where('points_value', 500)->values(),
-                    750 => $categoryRounds->where('points_value', 750)->values(),
-                ],
+                'rounds' => collect(Question::DIFFICULTY_POINTS)
+                    ->mapWithKeys(fn($points) => [$points => $categoryRounds->where('points_value', $points)->values()])
+                    ->all(),
             ];
         }
 

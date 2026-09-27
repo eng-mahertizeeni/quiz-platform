@@ -38,7 +38,7 @@
                     <td class="small">{{ Str::limit($s->question_text, 50) }}</td>
                     <td>{{ $s->user->name ?? '--' }}</td>
                     <td>{{ $s->category->name ?? '--' }}</td>
-                    <td><span class="badge badge-points-{{ $s->difficulty === 'medium' ? 250 : ($s->difficulty === 'hard' ? 500 : 750) }}">{{ $s->difficulty_label }}</span></td>
+                    <td><span class="badge badge-points-{{ \App\Models\Question::DIFFICULTY_POINTS[$s->difficulty] ?? '' }}">{{ $s->difficulty_label }}</span></td>
                     <td>
                         @if($s->isPending())
                             <span class="badge bg-warning text-dark">بانتظار المراجعة</span>

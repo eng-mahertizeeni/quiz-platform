@@ -10,6 +10,8 @@ class GameSession extends Model
 {
     use HasFactory;
 
+    const CATEGORIES_COUNT = 6;
+
     protected $fillable = [
         'code', 'created_by', 'status', 'current_team_id',
         'current_round', 'total_questions', 'answered_questions',

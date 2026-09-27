@@ -42,23 +42,6 @@ class GameController extends Controller
                 return $cat;
             });
 
-        if (Auth::check()) {
-            $user = Auth::user();
-            $answeredCounts = \App\Models\UserQuestionAnswer::where('user_id', $user->id)
-                ->whereHas('question', fn($q) => $q->active())
-                ->with('question.category')
-                ->get()
-                ->groupBy(fn($a) => $a->question->category_id)
-                ->map(fn($items) => $items->count());
-
-            foreach ($categories as $cat) {
-                $cat->answered_count = $answeredCounts->get($cat->id, 0);
-                $cat->progress = $cat->questions_count > 0
-                    ? round(($cat->answered_count / $cat->questions_count) * 100, 1)
-                    : 0;
-            }
-        }
-
         return view('game.select-categories', compact('session', 'categories'));
     }
 

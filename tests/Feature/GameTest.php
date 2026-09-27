@@ -24,28 +24,31 @@ class GameTest extends TestCase
         $this->user = User::factory()->create();
 
         $this->category = Category::factory()->create();
-        foreach (['medium', 'hard', 'very_hard'] as $diff) {
+        foreach (Question::DIFFICULTY_POINTS as $diff => $points) {
             Question::factory()->count(2)->create([
                 'category_id' => $this->category->id,
                 'difficulty' => $diff,
-                'points' => $diff === 'medium' ? 250 : ($diff === 'hard' ? 500 : 750),
+                'points' => $points,
                 'status' => 'active',
             ]);
         }
     }
 
+    #[Test]
     public function create_game_page_is_accessible()
     {
         $response = $this->actingAs($this->user)->get(route('game.create'));
         $response->assertStatus(200);
     }
 
+    #[Test]
     public function guests_cannot_access_create_game()
     {
         $response = $this->get(route('game.create'));
         $response->assertRedirect(route('login', absolute: false));
     }
 
+    #[Test]
     public function game_can_be_created()
     {
         $response = $this->actingAs($this->user)->post(route('game.store'), [
@@ -59,6 +62,7 @@ class GameTest extends TestCase
         $response->assertRedirect(route('game.categories', $session->code));
     }
 
+    #[Test]
     public function categories_page_shows_games()
     {
         $session = $this->createGameSession();
@@ -67,17 +71,18 @@ class GameTest extends TestCase
         $response->assertStatus(200);
     }
 
+    #[Test]
     public function categories_can_be_attached_to_game()
     {
         $session = $this->createGameSession();
         $categories = Category::factory()->count(6)->create();
 
         foreach ($categories as $cat) {
-            foreach (['medium', 'hard', 'very_hard'] as $diff) {
+            foreach (Question::DIFFICULTY_POINTS as $diff => $points) {
                 Question::factory()->count(2)->create([
                     'category_id' => $cat->id,
                     'difficulty' => $diff,
-                    'points' => $diff === 'medium' ? 250 : ($diff === 'hard' ? 500 : 750),
+                    'points' => $points,
                     'status' => 'active',
                 ]);
             }
@@ -90,8 +95,30 @@ class GameTest extends TestCase
 
         $response->assertRedirect(route('game.lobby', $session->code));
         $this->assertCount(6, $session->fresh()->categories);
+
+        $rounds = $session->fresh()->rounds;
+        $this->assertCount(36, $rounds);
+        $this->assertEquals(
+            [200 => 12, 400 => 12, 600 => 12],
+            $rounds->countBy('points_value')->sortKeys()->all()
+        );
     }
 
+    #[Test]
+    public function exactly_six_categories_are_required()
+    {
+        $session = $this->createGameSession();
+
+        $response = $this->actingAs($this->user)
+            ->post(route('game.categories.attach', $session->code), [
+                'category_ids' => [$this->category->id],
+            ]);
+
+        $response->assertSessionHasErrors('category_ids');
+        $this->assertCount(0, $session->fresh()->categories);
+    }
+
+    #[Test]
     public function lobby_page_is_accessible()
     {
         $session = $this->createGameSession();
@@ -100,17 +127,18 @@ class GameTest extends TestCase
         $response->assertStatus(200);
     }
 
+    #[Test]
     public function game_can_be_started()
     {
         $session = $this->createGameSession();
         $categories = Category::factory()->count(6)->create();
 
         foreach ($categories as $cat) {
-            foreach (['medium', 'hard', 'very_hard'] as $diff) {
+            foreach (Question::DIFFICULTY_POINTS as $diff => $points) {
                 Question::factory()->count(2)->create([
                     'category_id' => $cat->id,
                     'difficulty' => $diff,
-                    'points' => $diff === 'medium' ? 250 : ($diff === 'hard' ? 500 : 750),
+                    'points' => $points,
                     'status' => 'active',
                 ]);
             }
@@ -126,6 +154,7 @@ class GameTest extends TestCase
         $this->assertEquals('active', $session->fresh()->status);
     }
 
+    #[Test]
     public function board_page_redirects_to_lobby_if_waiting()
     {
         $session = $this->createGameSession();
@@ -134,12 +163,14 @@ class GameTest extends TestCase
         $response->assertRedirect(route('game.lobby', $session->code));
     }
 
+    #[Test]
     public function leaderboard_page_is_accessible()
     {
         $response = $this->get(route('leaderboard'));
         $response->assertStatus(200);
     }
 
+    #[Test]
     public function statistics_page_is_accessible()
     {
         $response = $this->get(route('statistics'));

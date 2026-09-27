@@ -20,16 +20,16 @@
             <thead>
                 <tr>
                     <th style="background:var(--bg-card);min-width:150px">الفئة</th>
-                    <th style="background:var(--bg-card);min-width:120px"><span class="badge badge-points-250">250</span></th>
-                    <th style="background:var(--bg-card);min-width:120px"><span class="badge badge-points-500">500</span></th>
-                    <th style="background:var(--bg-card);min-width:120px"><span class="badge badge-points-750">750</span></th>
+                    @foreach(\App\Models\Question::DIFFICULTY_POINTS as $pts)
+                    <th style="background:var(--bg-card);min-width:120px"><span class="badge badge-points-{{ $pts }}">{{ $pts }}</span></th>
+                    @endforeach
                 </tr>
             </thead>
             <tbody>
                 @foreach($board as $row)
                 <tr>
                     <td class="fw-bold" style="background:var(--bg-card)">{{ $row['category']->name }}</td>
-                    @foreach([250,500,750] as $pts)
+                    @foreach(\App\Models\Question::DIFFICULTY_POINTS as $pts)
                     <td class="p-2">
                         @php $rounds = $row['rounds'][$pts] @endphp
                         @foreach($rounds as $r)

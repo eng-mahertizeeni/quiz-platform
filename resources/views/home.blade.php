@@ -35,17 +35,6 @@
                     </div>
                     <h6 class="fw-bold mb-1">{{ $cat->name }}</h6>
                     <small class="text-muted">{{ $cat->questions_count }} سؤال</small>
-                    @auth
-                    <div class="mt-2">
-                        <div class="progress" style="height:6px;background:var(--border)">
-                            <div class="progress-bar" role="progressbar"
-                                 style="width:{{ $cat->progress ?? 0 }}%;background:{{ $cat->color }}"
-                                 aria-valuenow="{{ $cat->progress ?? 0 }}" aria-valuemin="0" aria-valuemax="100">
-                            </div>
-                        </div>
-                        <small class="d-block mt-1" style="color:{{ $cat->color }}">{{ $cat->progress ?? 0 }}%</small>
-                    </div>
-                    @endauth
                 </div>
             </div>
             @endforeach

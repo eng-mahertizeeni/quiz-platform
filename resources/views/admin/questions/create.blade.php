@@ -18,9 +18,9 @@
             <div class="col-md-6">
                 <label class="form-label fw-bold">مستوى الصعوبة</label>
                 <select name="difficulty" class="form-select" required>
-                    <option value="medium" {{ old('difficulty')=='medium' ? 'selected' : '' }}>متوسط (250)</option>
-                    <option value="hard" {{ old('difficulty')=='hard' ? 'selected' : '' }}>صعب (500)</option>
-                    <option value="very_hard" {{ old('difficulty')=='very_hard' ? 'selected' : '' }}>صعب جداً (750)</option>
+                    <option value="easy" {{ old('difficulty')=='easy' ? 'selected' : '' }}>سهل (200)</option>
+                    <option value="medium" {{ old('difficulty')=='medium' ? 'selected' : '' }}>متوسط (400)</option>
+                    <option value="hard" {{ old('difficulty')=='hard' ? 'selected' : '' }}>صعب (600)</option>
                 </select>
             </div>
             <div class="col-12">

@@ -3,7 +3,11 @@
 @section('content')
 <div class="container py-4">
     <h4 class="fw-bold mb-3"><i class="fas fa-tags text-warning me-2"></i>اختر الفئات للعبة</h4>
-    <p class="text-muted">اختر من 1 إلى 6 فئات. يمكنك اختيار عدد أقل من الفئات للعبة أسرع.</p>
+    <p class="text-muted">اختر {{ \App\Models\GameSession::CATEGORIES_COUNT }} فئات. كل فئة فيها 6 أسئلة: سؤالان بـ 200 (سهل)، سؤالان بـ 400 (متوسط)، سؤالان بـ 600 (صعب).</p>
+
+    @error('category_ids')
+    <div class="alert alert-danger">{{ $message }}</div>
+    @enderror
 
     <form method="POST" action="{{ route('game.categories.attach', $session->code) }}" id="categoriesForm">
         @csrf
@@ -18,20 +22,7 @@
                             {{ $cat->name }}
                         </label>
                     </div>
-                    <div class="d-flex justify-content-between mt-1">
-                        <small class="text-muted">{{ $cat->questions_count }} سؤال</small>
-                        @auth
-                        <small style="color:{{ $cat->color }}">{{ $cat->progress ?? 0 }}%</small>
-                        @endauth
-                    </div>
-                    @auth
-                    <div class="progress mt-1" style="height:4px;background:var(--border)">
-                        <div class="progress-bar" role="progressbar"
-                             style="width:{{ $cat->progress ?? 0 }}%;background:{{ $cat->color }}"
-                             aria-valuenow="{{ $cat->progress ?? 0 }}" aria-valuemin="0" aria-valuemax="100">
-                        </div>
-                    </div>
-                    @endauth
+                    <small class="text-muted d-block mt-1">{{ $cat->questions_count }} سؤال</small>
                     @if(!$cat->has_enough)
                     <small class="text-danger">لا يوجد أسئلة كافية</small>
                     @endif
@@ -41,7 +32,7 @@
         </div>
 
         <div class="mt-4 d-flex justify-content-between align-items-center">
-            <span class="text-muted" id="selectedCount">0 من 6 فئات مختارة</span>
+            <span class="text-muted" id="selectedCount">0 من {{ \App\Models\GameSession::CATEGORIES_COUNT }} فئات مختارة</span>
             <button type="submit" class="btn btn-primary-custom btn-lg" id="submitBtn" disabled>تأكيد الاختيار</button>
         </div>
     </form>
@@ -49,6 +40,7 @@
 
 @push('scripts')
 <script>
+    const REQUIRED = @json(\App\Models\GameSession::CATEGORIES_COUNT);
     let selected = new Set();
     function toggleCategory(el) {
         const cb = el.querySelector('.category-checkbox');
@@ -60,7 +52,7 @@
         cb.addEventListener('change', function() {
             const id = this.value;
             if (this.checked) {
-                if (selected.size >= 6) { this.checked = false; return; }
+                if (selected.size >= REQUIRED) { this.checked = false; return; }
                 selected.add(id);
                 this.closest('.category-card').style.borderColor = 'var(--success)';
             } else {
@@ -72,8 +64,8 @@
     });
     function updateUI() {
         const count = selected.size;
-        document.getElementById('selectedCount').innerText = count + ' من 6 فئات مختارة';
-        document.getElementById('submitBtn').disabled = count < 1 || count > 6;
+        document.getElementById('selectedCount').innerText = count + ' من ' + REQUIRED + ' فئات مختارة';
+        document.getElementById('submitBtn').disabled = count !== REQUIRED;
     }
 </script>
 @endpush

@@ -22,7 +22,7 @@ class SubmittedQuestionFactory extends Factory
             'answer_c' => fake()->word(),
             'answer_d' => fake()->word(),
             'correct_answer' => fake()->randomElement(['a', 'b', 'c', 'd']),
-            'difficulty' => fake()->randomElement(['medium', 'hard', 'very_hard']),
+            'difficulty' => fake()->randomElement(['easy', 'medium', 'hard']),
             'status' => 'pending',
         ];
     }

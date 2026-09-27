@@ -11,9 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             CategorySeeder::class,
-            QuestionSeeder::class,
-            BluffQuestionSeeder::class,
-            WhoAmISeeder::class,
+            GameQuestionSeeder::class,
         ]);
     }
 }

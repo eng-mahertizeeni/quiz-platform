@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\GameSession;
-use App\Models\UserQuestionAnswer;
 use App\Services\StatsService;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,23 +16,6 @@ class HomeController extends Controller
         $featuredCategories = Category::active()->featured()->withCount('questions')->orderBy('sort_order')->limit(8)->get();
         $leaderboard = $this->statsService->getLeaderboard(5);
         $mostPlayedCategories = $this->statsService->getMostPlayedCategories(6);
-
-        if (Auth::check()) {
-            $user = Auth::user();
-            $answeredCounts = UserQuestionAnswer::where('user_id', $user->id)
-                ->whereHas('question', fn($q) => $q->active())
-                ->with('question.category')
-                ->get()
-                ->groupBy(fn($a) => $a->question->category_id)
-                ->map(fn($items) => $items->count());
-
-            foreach ($featuredCategories as $cat) {
-                $cat->answered_count = $answeredCounts->get($cat->id, 0);
-                $cat->progress = $cat->questions_count > 0
-                    ? round(($cat->answered_count / $cat->questions_count) * 100, 1)
-                    : 0;
-            }
-        }
 
         return view('home', compact('featuredCategories', 'leaderboard', 'mostPlayedCategories'));
     }
@@ -48,26 +30,7 @@ class HomeController extends Controller
             ->latest()
             ->get();
 
-        $categories = Category::active()
-            ->withCount(['questions' => fn($q) => $q->active()])
-            ->orderBy('sort_order')
-            ->get();
-
-        $answeredCounts = UserQuestionAnswer::where('user_id', $user->id)
-            ->whereHas('question', fn($q) => $q->active())
-            ->with('question.category')
-            ->get()
-            ->groupBy(fn($a) => $a->question->category_id)
-            ->map(fn($items) => $items->count());
-
-        foreach ($categories as $cat) {
-            $cat->answered_count = $answeredCounts->get($cat->id, 0);
-            $cat->progress = $cat->questions_count > 0
-                ? round(($cat->answered_count / $cat->questions_count) * 100, 1)
-                : 0;
-        }
-
-        return view('user.dashboard', compact('stats', 'activeGames', 'categories'));
+        return view('user.dashboard', compact('stats', 'activeGames'));
     }
 
     public function leaderboard()

@@ -53,9 +53,9 @@
                         <div class="col-md-4">
                             <label class="form-label fw-bold">مستوى الصعوبة</label>
                             <select name="difficulty" class="form-select" required>
-                                <option value="medium" {{ old('difficulty')=='medium' ? 'selected' : '' }}>متوسط (250 نقطة)</option>
-                                <option value="hard" {{ old('difficulty')=='hard' ? 'selected' : '' }}>صعب (500 نقطة)</option>
-                                <option value="very_hard" {{ old('difficulty')=='very_hard' ? 'selected' : '' }}>صعب جداً (750 نقطة)</option>
+                                <option value="easy" {{ old('difficulty')=='easy' ? 'selected' : '' }}>سهل (200 نقطة)</option>
+                                <option value="medium" {{ old('difficulty')=='medium' ? 'selected' : '' }}>متوسط (400 نقطة)</option>
+                                <option value="hard" {{ old('difficulty')=='hard' ? 'selected' : '' }}>صعب (600 نقطة)</option>
                             </select>
                         </div>
                         <div class="col-md-4">

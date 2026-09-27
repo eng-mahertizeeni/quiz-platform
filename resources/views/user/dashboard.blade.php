@@ -85,31 +85,5 @@
         @endif
     </div>
 
-    @if($categories->isNotEmpty())
-    <div class="mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold"><i class="fas fa-book-open text-info me-2"></i>التدريب على الفئات</h5>
-            <a href="{{ route('practice.index') }}" class="btn btn-sm btn-outline-info">عرض الكل <i class="fas fa-arrow-left me-1"></i></a>
-        </div>
-        <div class="row g-2">
-            @foreach($categories->take(6) as $cat)
-            <div class="col-md-2 col-4">
-                <a href="{{ route('practice.quiz', $cat->slug) }}" class="text-decoration-none">
-                    <div class="card-custom p-3 text-center">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:40px;height:40px;background:{{ $cat->color }}22;color:{{ $cat->color }}">
-                            <i class="fas fa-{{ $cat->icon ?: 'tag' }}"></i>
-                        </div>
-                        <small class="fw-bold d-block text-light">{{ $cat->name }}</small>
-                        <small class="text-muted d-block">{{ $cat->answered_count }}/{{ $cat->questions_count }}</small>
-                        <div class="progress mt-1" style="height:4px;background:var(--border)">
-                            <div class="progress-bar" style="width:{{ $cat->progress }}%;background:{{ $cat->color }}"></div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
 </div>
 @endsection

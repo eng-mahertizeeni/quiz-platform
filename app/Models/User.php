@@ -55,11 +55,6 @@ class User extends Authenticatable
         return $this->hasMany(Question::class, 'created_by');
     }
 
-    public function questionAnswers()
-    {
-        return $this->hasMany(UserQuestionAnswer::class);
-    }
-
     public function getWinRateAttribute(): float
     {
         $played = (int) $this->games_played;

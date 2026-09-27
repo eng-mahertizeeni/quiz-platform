@@ -53,16 +53,15 @@ class Category extends Model
         return $this->belongsToMany(GameSession::class, 'game_session_categories');
     }
 
-    public function getQuestionCountByPoints(int $points): int
-    {
-        return $this->activeQuestions()->where('points', $points)->count();
-    }
-
     public function hasEnoughQuestions(): bool
     {
-        return $this->getQuestionCountByPoints(250) >= 2
-            && $this->getQuestionCountByPoints(500) >= 2
-            && $this->getQuestionCountByPoints(750) >= 2;
+        foreach (array_keys(Question::DIFFICULTY_POINTS) as $difficulty) {
+            if ($this->questionsByDifficulty($difficulty)->count() < 2) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function getThumbnailUrlAttribute(): string

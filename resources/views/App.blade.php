@@ -108,11 +108,9 @@
 
         }
 
-        .badge-points-250 { background: 
-
-        .badge-points-500 { background: 
-
-        .badge-points-750 { background: 
+        .badge-points-200 { background: #10B981; color: #fff; }
+        .badge-points-400 { background: #F59E0B; color: #000; }
+        .badge-points-600 { background: #EF4444; color: #fff; }
 
         .toast-container { z-index: 9999; }
 
@@ -209,14 +207,8 @@
                         @endif
 
                         <li class="nav-item">
-                            <a class="btn btn-sm btn-info fw-bold text-dark" href="{{ route('practice.index') }}">
-                                <i class="fas fa-book-open me-1"></i>ممارسة
-                            </a>
                             <a class="btn btn-sm btn-warning fw-bold" href="{{ route('bluff.index') }}">
                                 <i class="fas fa-dice me-1"></i>Face Off
-                            </a>
-                            <a class="btn btn-sm" style="background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;font-weight:700;border-radius:10px;" href="{{ route('kuraiyat.index') }}">
-                                🕵️ أنا مين
                             </a>
                             <a class="btn btn-sm btn-success fw-bold" href="{{ route('game.create') }}">
                                 <i class="fas fa-play me-1"></i>لعبة جديدة

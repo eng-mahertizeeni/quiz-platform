@@ -29,12 +29,6 @@ class QuestionService
     public function approve(SubmittedQuestion $submission, User $admin): Question
     {
         return DB::transaction(function () use ($submission, $admin) {
-            $pointsMap = [
-                'medium' => 250,
-                'hard' => 500,
-                'very_hard' => 750,
-            ];
-
             $question = Question::create([
                 'category_id' => $submission->category_id,
                 'created_by' => $submission->user_id,
@@ -45,7 +39,7 @@ class QuestionService
                 'answer_d' => $submission->answer_d,
                 'correct_answer' => $submission->correct_answer,
                 'difficulty' => $submission->difficulty,
-                'points' => $pointsMap[$submission->difficulty],
+                'points' => Question::DIFFICULTY_POINTS[$submission->difficulty],
                 'image' => $submission->image,
                 'status' => 'active',
             ]);
