@@ -5,20 +5,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Fresh start for question content:
- * - wipes every team-game question, submission and played game (the old boards used 250/500/750)
- * - wipes Bluff questions and games (Bluff logic stays)
- * - drops the Practice and "Who am I" (kuraiyat) features
- * - team-game tiers become easy/medium/hard = 200/400/600
- *
- * New questions come from database/questions/*.txt via `php artisan questions:import`.
- */
 return new class extends Migration
 {
     public function up(): void
     {
-        // Break the game_sessions <-> game_teams cycle first; MySQL refuses the cascading SET NULL otherwise.
+        // Break the sessions/teams FK cycle (MySQL).
         DB::table('game_sessions')->update(['current_team_id' => null]);
         DB::table('game_sessions')->delete();
         DB::table('question_statistics')->delete();
@@ -56,7 +47,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // The old tiers cannot hold the new questions, and the deleted content is not restored.
         DB::table('game_sessions')->update(['current_team_id' => null]);
         DB::table('game_sessions')->delete();
         DB::table('submitted_questions')->delete();

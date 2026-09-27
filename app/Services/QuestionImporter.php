@@ -7,22 +7,7 @@ use App\Models\Question;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-/**
- * Imports team-game questions from database/questions/*.txt.
- *
- * File format (one question per line, fields separated by "|"):
- *
- *     # comment
- *     @category football
- *     200|السؤال|الإجابة الصحيحة|خيار خاطئ|خيار خاطئ|خيار خاطئ
- *
- * - The first field is the points: 200 (easy), 400 (medium) or 600 (hard).
- * - The first answer is always the correct one; answer positions are shuffled on import.
- * - "@category <slug>" applies to every line after it until the next "@category".
- *
- * The files are the source of truth for imported questions: a question removed
- * from its file is deactivated on the next import.
- */
+// Imports team-game questions from database/questions/*.txt (format: see README.md there).
 class QuestionImporter
 {
     private const ANSWER_KEYS = ['a', 'b', 'c', 'd'];
@@ -32,11 +17,6 @@ class QuestionImporter
         $this->directory ??= database_path('questions');
     }
 
-    /**
-     * Parse every file without writing anything.
-     *
-     * @return array{questions: array<int, array>, errors: array<int, string>}
-     */
     public function parse(): array
     {
         $difficulties = array_flip(Question::DIFFICULTY_POINTS);
@@ -124,11 +104,6 @@ class QuestionImporter
         return ['questions' => $questions, 'errors' => $errors];
     }
 
-    /**
-     * Validate every file and, only if all of them are valid, sync them into the database.
-     *
-     * @return array{created: int, updated: int, unchanged: int, deactivated: int}
-     */
     public function import(): array
     {
         ['questions' => $questions, 'errors' => $errors] = $this->parse();
@@ -167,7 +142,6 @@ class QuestionImporter
                     continue;
                 }
 
-                // Keep the current answer order unless the answers themselves changed.
                 $currentAnswers = $question->answers;
                 $sameAnswers = collect($currentAnswers)->sort()->values()->all() === collect($data['answers'])->sort()->values()->all()
                     && $question->correct_answer_text === $data['correct'];
@@ -199,9 +173,6 @@ class QuestionImporter
         });
     }
 
-    /**
-     * @return array<int, string>
-     */
     private function files(): array
     {
         $files = glob($this->directory . '/*.txt') ?: [];
